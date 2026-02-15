@@ -13,9 +13,9 @@
 Schemat elektryczny, stworzony na potrzeby tej pracy, został podzielony na segmenty pełniące konkretne funkcje.
 
 \subsection{Sekcja ładowania superkondesatorów}
-Użycie paneli fotowoltaicznych jako jedynego źródła energii dla superkondesatorów sprawia pewne problemy. Ze względu na zmienne nasłonecznienie panelu --- wynikające z czynników zewnętrznych, np. cień rzucany przez liście, czy pora dnia --- napięcie na wyjściu ogniwa nie jest stałe. Aby w superkondesatorze nie zaszły niechciane, nieodwracalne zmiany, nie powinno się ładować go napięciem wyższym niż napięcie znamionowe, które w przypadku tego układu wynosi 2,7V. Aby pogodzić te 2 fakty napięcie --- pochodzące z ogniwa fotowoltaicznego --- zostanie wyregulowane za pomocą regulatora bocznikowego (ang. \textit{shunt regulator}), zbudowanego z tranzystora, zwierającego linię napięcia z masą, i diody nim sterującej. W celu zabezpieczenia panelu przed prądem wstecznym na jego dodatnim wyjściu została umieszczona dioda Schottky'ego.
+Zastosowanie paneli fotowoltaicznych jako jedynego źródła energii do ładowania superkondensatorów wiąże się z określonymi ograniczeniami. Ze względu na zmienne warunki nasłonecznienia, wynikające z czynników zewnętrznych, takich jak okresowe zacienienie panelu przez elementy otoczenia lub zmiany pory dnia, napięcie generowane na wyjściu panelu fotowoltaicznego nie ma charakteru stałego. W celu zapobieżenia wystąpieniu niepożądanych i nieodwracalnych zmian w strukturze superkondensatora konieczne jest ograniczenie napięcia ładowania do wartości nieprzekraczającej napięcia znamionowego\cite{https://doi.org/10.1002/aenm.202301008}, które w analizowanym układzie wynosi 2,7 V. W związku z powyższym napięcie pochodzące z ogniwa fotowoltaicznego jest regulowane za pomocą regulatora bocznikowego (ang. \textit{shunt regulator}), zrealizowanego w postaci tranzystora zwierającego linię zasilania z masą oraz diody sterującej jego pracą. Dodatkowo, w celu zabezpieczenia panelu fotowoltaicznego przed przepływem prądu wstecznego, na jego dodatnim wyjściu zastosowano diodę Schottky'ego.
 
-Początkowo diodą w regulatorze była dioda Zenera, jak pokazano na rysunku~\ref*{rys:cond-charging-zener}. W wyniku testów jednak została ona zastąpiona diodą LED, aby zwiększyć stabilność regulatora względem prądu, jaki zostaje przepuszczony przez tranzystor. Porównanie widoczne jest w Tabeli~\ref*{tab:zener-led-voltage-comparison}.
+W początkowej wersji regulatora bocznikowego jako element sterujący pracą tranzystora zastosowano diodę Zenera, którego schemat przedstawiono na rysunku~\ref*{rys:cond-charging-zener}. W wyniku przeprowadzonych testów rozwiązanie to zostało jednak zastąpione diodą LED (rysunek \ref*{rys:cond-charging-led}), co pozwoliło na zwiększenie stabilności pracy regulatora w zakresie prądu przewodzonego przez tranzystor. Porównanie parametrów obu rozwiązań przedstawiono w tabeli~\ref*{tab:zener-led-voltage-comparison}.
 
 \begin{figure}[H]
     \centering
@@ -47,11 +47,22 @@ Początkowo diodą w regulatorze była dioda Zenera, jak pokazano na rysunku~\re
         500 & 3,00 & 2,68 \\
         \hline
     \end{tabular}
-    \caption{Napięcie wyjściowe U\textsubscript{Wy} regulatora bocznikowego, dla prądu emitera I\textsubscript{E} tranzystora zwierającego, przy użyciu diody Zenera i diody LED}
+    \caption{Napięcie wyjściowe U\textsubscript{Wy} regulatora bocznikowego przy użyciu diody Zenera i diody LED, dla prądu emitera I\textsubscript{E} tranzystora zwierającego. Do testu użyto zasilacza stałoprądowego.}
     \label{tab:zener-led-voltage-comparison}
 \end{table}
 
 \subsection{Układ regulacji napięcia}
+Układ regulacji napięcia, przedstawiony na rysunku \ref*{rys:voltage_regulation}, składa się z 2 połączonych ze sobą układów. W celu wykorzystania jak największej ilości energii, zgromadzonej w superkondesatorach, napięcie jest podwyższane poprzez przetwornicę typu step-up --- zbudowaną w oparciu o układ ME210833P --- do wartości 5V. Dzięki temu połączone szeregowo superkondensatory mogą być rozładowane do napięcia mniejszego niż 1V\cite{ME2108A33P}. Podwyższone napięcie jest następnie obniżane do wartości 3.3V z użyciem regulatora liniowego HT7333 o niskim poborze mocy i niskim prądzie spoczynkowym\cite{HT7333}.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{fig/voltage_regulation_section.png}
+    \caption{Układ regulacji napięcia oparty o przetwornicę step-up i regulator liniowy.}
+    \label{rys:voltage_regulation}
+\end{figure}
+
+
 \subsection{Magistrala $I^2C$}
 \subsection{Mikrokontroler ATmega328p}
 \subsection{Układ komunikacji radiowej}
