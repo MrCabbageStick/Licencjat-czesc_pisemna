@@ -115,13 +115,34 @@ Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328
     \label{rys:atmega328p_in_schematic}
 \end{figure}
 
+
 \subsection{Magistrala $I^2C$}
+Ze względu na niskoprądowe założenie projektu linia zasilająca urządzenia $I^2C$ została oddzielona od linii zasilania mikrokontrolera tranzystorem MOSFET, jak pokazano na rysuneku \ref*{rys:i2c_voltage_enable}. Pozwala to na włączenie tych urządzeń gdy istnieje potrzeba zebrania danych pomiarowych. 
+
+W celu zabezpieczenia wyłączonych urządzeń magistrali przed napięciem na liniach SDA i SCL zostały zastosowane konwertery poziomów logicznych (ang. \textit{level shifters}), pokazane na rysunku \ref*{rys:i2c_level_shifters}. Jednocześnie rezystory, użyte w konwerterze, pełnią funkcję rezystorów podciągających dla lini SDA i SCL wymaganych do komunikacji protokołem $I^2C$ \cite{I2C_specification}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{fig/i2c_voltage_enable.png}
+        \caption{Tranzystor załączający linię zasilania urządzeń magistrali $I^2C$.}
+        \label{rys:i2c_voltage_enable}
+    \end{minipage}
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{fig/i2c_voltage_shifters.png}
+        \caption{Konwertery poziomów logicznych dla linii SDA i SCL magistrali $I^2C$.}
+        \label{rys:i2c_level_shifters}
+    \end{minipage}
+\end{figure}
+
 \subsection{Układ komunikacji radiowej}
 
 \section{Elementy pomiarowe}
 \subsection{Barometr, higrometr i termometr}
 \subsection{Moduł z licznikiem Geigera-Müllera}
-\subsection{Moduł pomiaru nateżenia światła}
+\subsection{Moduł pomiaru natężenia światła}
 
 \section{Elementy dodatkowe}
 \subsection{Magistrala 1-Wire}
