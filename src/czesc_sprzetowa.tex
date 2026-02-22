@@ -60,7 +60,11 @@ W początkowej wersji regulatora bocznikowego jako element sterujący pracą tra
 
 
 \subsection{Układ regulacji napięcia}
-Układ regulacji napięcia, przedstawiony na rysunku \ref*{rys:voltage_regulation}, składa się z 2 połączonych ze sobą układów. W celu wykorzystania jak największej ilości energii, zgromadzonej w superkondesatorach, napięcie jest podwyższane do wartości 5V poprzez przetwornicę typu step-up, zbudowaną w oparciu o układ ME210833P. Dzięki temu połączone szeregowo superkondensatory mogą być rozładowane do napięcia niższego niż 1V\cite{ME2108A33P}. Podwyższone napięcie jest następnie obniżane do wartości 3.3V z użyciem regulatora liniowego HT7333 o niskim poborze mocy i niskim prądzie spoczynkowym\cite{HT7333}.
+Układ regulacji napięcia, przedstawiony na rysunku \ref*{rys:voltage_regulation}, składa się z 2 połączonych ze sobą części.
+
+Pierwszą z nich jest przetwornica typu step-up, zbudowana w oparciu o układ ME210833P. Jej zastosowanie pozwala na zapewnienie zasilania gdy napięcie na połączonych szeregowo superkondesatorach spadnie poniżej 3,3V. Pozwoli to na rozładowanie ich do łącznego napięcia około 1V, co wynika z ograniczeń układu sterującego przetwornicy\cite{ME2108A33P}. W momencie gdy napięcie wejściowe przetwornicy przekroczy 3,3V, zostanie ona pominięta, przez diodę Schottky'ego podłączoną pomiędzy jej wejściem i wyjściem.
+
+Napięcie jest następnie ograniczane do wartości 3.3V z użyciem regulatora liniowego HT7333 o niskim spadku napięcia (rzędu 80mV\cite{HT7333}), i niskim prądzie spoczynkowym (o maksymalnej wartości \qty{8}{\micro\ampere}\cite{HT7333}).
 
 \begin{figure}[H]
     \centering
@@ -72,6 +76,8 @@ Układ regulacji napięcia, przedstawiony na rysunku \ref*{rys:voltage_regulatio
 
 \subsection{Mikrokontroler ATmega328P}
 Głównym elementem układu jest mikrokontroler ATmega328P, oparty o 8-bitowy procesor z architekturą AVR firmy Atmel, posiadający 32KB wbudowanej pamięci typu flash\cite{ATmega328p}. Najważniejszymi jego cechami, w kontekście tego projektu, są niski pobór mocy, możliwość uśpienia oraz wbudowane konwertery analogowo-cyfrowe\cite{ATmega328p}. Ze~względu na popularność mikrokontrolerów rodziny AVR i wykorzystanie ich w platformach takich jak Arduino UNO\cite{Arduino_Uno_Product_Page} czy Arduino NANO\cite{Arduino_Nano_Product_Page}, posiadają one rozbudowany ekosystem zapewniający narzędzia potrzebne do ich oprogramowania.
+
+Mikrokontroler został wyposażony w 3,6864 MHz oscylator kwarcowy. Wartość ta została wybrana ze względu na wygodę generowania standardowych prędkości UART dla których dzielniki, przy takiej częstotliwości, są liczbami całkowitymi \cite{UART_baudrate_calculator}.
 
 Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328p_in_schematic}, a opis funkcji portów jest przedstawiony w tabeli \ref*{tab:microcontroller_port_functions}.
 
