@@ -19,8 +19,9 @@ Komunikacja z modułem AHT20 realizowana jest za pośrednictwem magistrali \isqr
           gotowości do przeprowadzenia kolejnego pomiaru.
 \end{itemize}
 
-Procedura inicjalizacji modułu, przedstawiona na listingu poniżej, rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, po którym następuje odczyt rejestru statusu. W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, a następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do jej wykonania:
-\begin{lstlisting}[language=Rust]
+Procedura inicjalizacji modułu, przedstawiona na listingu \ref*{lst:aht20_init}, rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, po którym następuje odczyt rejestru statusu. W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, a następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do jej wykonania:
+
+\begin{lstlisting}[language=Rust, caption={Inicjalizacja modułu AHT20}, label={lst:aht20_init}]
 delay.delay_ms(40);
 
 let status = self.read_status(i2c)?;
