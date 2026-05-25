@@ -117,9 +117,9 @@ Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328
 
 
 \subsection{Magistrala $I^2C$}
-$I^2C$ jest magistralą i protokołem synchronicznym umożliwiającym komunikację pomiedzy urządzeniami z użyciem 2 połączeń: zegarowego (oznaczanego jako SCL) oraz danych (oznaczanego jako SDA). Wykorzystane w tym celu wyprowadzenia mikrokontrolera widoczne są w tabeli \ref{tab:microcontroller_port_functions}. W projekcie użyte zostały 3 urządzenia używające tej magistrali: AHT20, BMP280 i VEML7700, które zostaną omówione w rozdziale \ref{section:devices}. Dodatkowo, w celu konserwacji energii, linia zasilania urządzeń tej magistrali może zostać odłączona poprzez podanie stanu wysokiego na tranzystor widoczny na rysunku [TODO: wstaw rysunek].
+$I^2C$ jest magistralą i protokołem synchronicznym umożliwiającym komunikację pomiedzy urządzeniami z użyciem 2 połączeń: zegarowego (oznaczanego jako SCL) oraz danych (oznaczanego jako SDA). Wykorzystane w tym celu wyprowadzenia mikrokontrolera widoczne są w tabeli \ref{tab:microcontroller_port_functions}. W projekcie użyte zostały 3 urządzenia używające tej magistrali: AHT20, BMP280 i VEML7700, które zostaną omówione w rozdziale \ref{section:devices}. 
 
-W celu zabezpieczenia wyłączonych urządzeń magistrali przed napięciem na liniach SDA i SCL zostały zastosowane konwertery poziomów logicznych (ang. \textit{level shifters}), pokazane na rysunku \ref*{rys:i2c_level_shifters}. Jednocześnie rezystory, użyte w konwerterze, pełnią funkcję rezystorów podciągających dla lini SDA i SCL wymaganych do komunikacji protokołem $I^2C$ \cite{I2C_specification}.
+Dodatkowo, w celu konserwacji energii, linia zasilania urządzeń tej magistrali może zostać odłączona poprzez podanie stanu wysokiego na tranzystor widoczny na rysunku \ref{rys:i2c_voltage_enable}. Aby zabezpieczyć niezasilone urządzenia magistral przed napięciem, mogącym się pojawić na liniach SDA i SCL, zostały zastosowane konwertery poziomów logicznych (ang. \textit{level shifters}), pokazane na rysunku \ref*{rys:i2c_level_shifters}. Jednocześnie rezystory w nich zastosowane pełnią funkcję rezystorów podciągających dla lini SDA i SCL, wymaganych przez specyfikację standardu $I^2C$ \cite{I2C_specification}.
 
 \begin{figure}[H]
     \centering
@@ -138,8 +138,10 @@ W celu zabezpieczenia wyłączonych urządzeń magistrali przed napięciem na li
 \end{figure}
 
 \subsection{Układ komunikacji radiowej}
+Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych modułu nadajnika radiowego. Odpowiedzialność za przygotowanie i buforowanie danych w całości spoczywa na mikrokontrolerze. Z racji dużego poboru mocy przez układ radiowy [TODO: Wstaw pobór mocy], linia zasilania, podobnie jak w przypadku magistrali $I^2C$, została wyposażona w odcinający przepływ prądu tranzystor i konwerter stanów logicznych dla linii danych. 
 
 \section{Elementy pomiarowe}
+\label{section:devices}
 \subsection{Barometr, higrometr i termometr}
 \subsection{Moduł z licznikiem Geigera-Müllera}
 \subsection{Moduł pomiaru natężenia światła}
