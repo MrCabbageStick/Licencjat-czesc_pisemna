@@ -138,12 +138,22 @@ Dodatkowo, w celu konserwacji energii, linia zasilania urządzeń tej magistrali
 \end{figure}
 
 \subsection{Układ komunikacji radiowej}
-Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych modułu nadajnika radiowego. Odpowiedzialność za przygotowanie i buforowanie danych w całości spoczywa na mikrokontrolerze. Z racji dużego poboru mocy przez układ radiowy [TODO: Wstaw pobór mocy], linia zasilania, podobnie jak w przypadku magistrali $I^2C$, została wyposażona w odcinający przepływ prądu tranzystor i konwerter stanów logicznych dla linii danych. 
+Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych modułu nadajnika radiowego. Odpowiedzialność za przygotowanie i buforowanie danych w całości spoczywa na mikrokontrolerze. Z racji dużego poboru mocy przez układ radiowy [TODO: Wstaw pobór mocy], linia zasilania, podobnie jak w przypadku magistrali $I^2C$, została wyposażona w odcinający przepływ prądu tranzystor i konwerter stanów logicznych dla linii danych, jak pokazano na rysunku [TODO: Wstaw rysunek]. 
 
 \section{Elementy pomiarowe}
 \label{section:devices}
 \subsection{Barometr, higrometr i termometr}
+Urządzenie zostało wyposażone w 2 moduły znajdujące się na wspólnej płytce:
+\begin{itemize}
+    \item VEML7700 --- mogący mierzyć temperaturę i ciśnienie atmosferyczne;
+    \item AHT20 --- mogący mierzyć temperaturę i wilgotność względną.
+\end{itemize}
+Obydwa moduły używają magistrali $I^2C$ do komunikacji.
+[TODO: Rozwiń]
+    
 \subsection{Moduł z licznikiem Geigera-Müllera}
+Licznik Geigera-Müllera użyty na potrzeby tego projektu, widoczny na rysunku [TODO: Wstaw zdjęcie], jest układem autorstwa inż. Karola Karpowicza i składa się z lampy Geigera-Müllera, wzmacniacza impulsów i generatora wysokiego napięcia. Na jego wyjściu, w momencie detekcji promieniowania, pojawia się impuls o wysokości napięcia zasilania, zadawany na wejście licznika mikrokontrolera. Opis sposobu zliczania impulsów opisany jest w rozdziale [TODO: Wstaw rozdział]
+
 \subsection{Moduł pomiaru natężenia światła}
 
 \section{Elementy dodatkowe}
