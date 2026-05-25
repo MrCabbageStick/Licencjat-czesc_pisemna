@@ -3,15 +3,45 @@
 \section{Język Rust w programowaniu mikrokontrolerów}
 
 \section{Narzędzia i biblioteki}
-\subsection{Avrdude}
-\subsection{Avr-hal}
+
 
 \section{Obsługa elementów pomiarowych}
-\subsection{Barometr, higrometr i termometr}
+\label{section:devices_programming}
+W celu ograniczenia wykorzystania zasobów pamięciowych mikrokontrolera znaczna część konfiguracji urządzeń pomiarowych realizowana jest na etapie kompilacji. Rozbudowany system typów \translation{type system} języka Rust umożliwia zwięzłe i czytelne wyrażenie konfiguracji z wykorzystaniem typów generycznych \translation{generic types}, cech \translation{traits} oraz stałych czasu kompilacji \translation{const generics}.
+
+\subsection{Moduł AHT20 --- czujnik temperatury i wilgotności względnej}
+Komunikacja z modułem AHT20 realizowana jest za pośrednictwem magistrali \isqrc poprzez wysyłanie dedykowanych komend sterujących. Moduł nie wymaga przesyłania danych konfiguracyjnych w trakcie działania. Zgodnie z notą katalogową producenta \cite{AHT20} urządzenie obsługuje następujący zestaw komend:
+\begin{itemize}
+    \item \textbf{Inicjalizacja} --- wymuszenie procedury kalibracji wewnętrznej układu;
+    \item \textbf{Wyzwolenie pomiaru} --- zainicjowanie akwizycji danych oraz
+          ich zapis do wewnętrznej pamięci urządzenia;
+    \item \textbf{Odczyt statusu} --- weryfikacja stanu kalibracji układu oraz
+          gotowości do przeprowadzenia kolejnego pomiaru.
+\end{itemize}
+
+Procedura inicjalizacji modułu, przedstawiona na listingu poniżej, rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, po którym następuje odczyt rejestru statusu. W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, a następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do jej wykonania:
+\begin{lstlisting}[language=Rust]
+delay.delay_ms(40);
+
+let status = self.read_status(i2c)?;
+
+if status & STATUS_CALIBRATED_BIT == 0 {
+    i2c.write(self.address, &COMMAND_INITIALIZE)?;
+    delay.delay_ms(10);
+}
+\end{lstlisting}
+
+
+\subsection{Moduł BMP280}
+
+
+\subsection{Moduł VEML7700}
+
+
 \subsection{Modułu z licznikiem Geigera-Müllera}
-\subsection{Moduł pomiaru nateżenia światła}
 
 \section{Komunikacja radiowa}
 \subsection{Serializacja danych}
 \subsection{Zabezpieczenie danych}
+[Nie zaimplementowane]
 \subsection{Transmisja danych}
