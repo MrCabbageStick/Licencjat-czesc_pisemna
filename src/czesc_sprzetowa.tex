@@ -10,7 +10,7 @@
 
 \section{Podstawowe elementy układu}
 
-Schemat elektryczny, widoczny na rysunku \ref*{rys:full_schematic}, został podzielony na segmenty pełniące konkretne funkcje.
+Schemat elektryczny, widoczny na rysunku \ref*{rys:full_schematic}, został podzielony na segmenty pełniące konkretne funkcje. [TODO: lepszy rysunek]
 
 \begin{figure}[H]
     \centering
@@ -145,17 +145,21 @@ Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych m
 \subsection{Barometr, higrometr i termometr}
 Urządzenie zostało wyposażone w 2 moduły znajdujące się na wspólnej płytce:
 \begin{itemize}
-    \item VEML7700 --- mogący mierzyć temperaturę i ciśnienie atmosferyczne;
+    \item BMP280 --- mogący mierzyć temperaturę i ciśnienie atmosferyczne;
     \item AHT20 --- mogący mierzyć temperaturę i wilgotność względną.
 \end{itemize}
 Obydwa moduły używają magistrali $I^2C$ do komunikacji.
 [TODO: Rozwiń]
     
 \subsection{Moduł z licznikiem Geigera-Müllera}
-Licznik Geigera-Müllera użyty na potrzeby tego projektu, widoczny na rysunku [TODO: Wstaw zdjęcie], jest układem autorstwa inż. Karola Karpowicza i składa się z lampy Geigera-Müllera, wzmacniacza impulsów i generatora wysokiego napięcia. Na jego wyjściu, w momencie detekcji promieniowania, pojawia się impuls o wysokości napięcia zasilania, zadawany na wejście licznika mikrokontrolera. Opis sposobu zliczania impulsów opisany jest w rozdziale [TODO: Wstaw rozdział]
+Licznik Geigera-Müllera użyty na potrzeby tego projektu, widoczny na rysunku [TODO: Wstaw zdjęcie], jest układem autorstwa inż. Karola Karpowicza i składa się z lampy Geigera-Müllera, wzmacniacza impulsów i generatora wysokiego napięcia. Na jego wyjściu, w momencie detekcji promieniowania, pojawia się impuls o wysokości napięcia zasilania, zadawany na wejście licznika mikrokontrolera. Opis sposobu zliczania impulsów opisany jest w rozdziale [TODO: Wstaw rozdział].
 
 \subsection{Moduł pomiaru natężenia światła}
+Za pomiar natężenia światła odpowiedzialny jest moduł VEML7700. Podobnie jak BMP280 i AHT20 komunikuje się z mikrokontrolerem używając protokołu $I^2C$. Natężenie światła mieżone jest w luksach. [TODO: Rozwiń]
 
 \section{Elementy dodatkowe}
 \subsection{Magistrala 1-Wire}
+[Nie zaimplementowane]
+
 \subsection{Wolne wyprowadzenia GPIO}
+[Nie zaimplementowane]
