@@ -1,13 +1,5 @@
 \chapter{Część sprzętowa}
 
-\section{Założenia projektowe}
-\subsection{Niski pobór mocy}
-\subsection{Zastosowanie paneli fotowoltaicznych}
-\subsection{Superkondesatory a akumulatory}
-\subsection{Komunikacja radiowa}
-
-\newpage{}
-
 \section{Podstawowe elementy układu}
 
 Schemat elektryczny, widoczny na rysunku \ref*{rys:full_schematic}, został podzielony na segmenty pełniące konkretne funkcje. [TODO: lepszy rysunek]
@@ -152,10 +144,10 @@ Obydwa moduły używają magistrali $I^2C$ do komunikacji.
 [TODO: Rozwiń]
     
 \subsection{Moduł z licznikiem Geigera-Müllera}
-Licznik Geigera-Müllera użyty na potrzeby tego projektu, widoczny na rysunku [TODO: Wstaw zdjęcie], jest układem autorstwa inż. Karola Karpowicza i składa się z lampy Geigera-Müllera, wzmacniacza impulsów i generatora wysokiego napięcia. Na jego wyjściu, w momencie detekcji promieniowania, pojawia się impuls o wysokości napięcia zasilania, zadawany na wejście licznika mikrokontrolera. Opis sposobu zliczania impulsów opisany jest w rozdziale \ref{section:geiger_code}.
+Moduł detekcji promieniowania jonizującego wykorzystuje licznik Geigera-Müllera oparty na projekcie opublikowanym na forum Elektroda~\cite{elektroda_licznik_geigera}, zmodyfikowanym na potrzeby niniejszej pracy przez inż. Karola Karpowicza (rysunek~[TODO: Wstaw zdjęcie]). Układ składa się z licznika Geigera-Müllera typu J321, wzmacniacza impulsów oraz generatora wysokiego napięcia. W chwili detekcji cząstki promieniowania na wyjściu modułu generowany jest impuls, który podawany jest na wejście licznikowe mikrokontrolera. Implementacja algorytmu zliczania impulsów została omówiona w rozdziale~\ref{section:geiger_code}.
 
 \subsection{Moduł pomiaru natężenia światła}
-Za pomiar natężenia światła odpowiedzialny jest moduł VEML7700. Podobnie jak BMP280 i AHT20 komunikuje się z mikrokontrolerem używając protokołu $I^2C$. Natężenie światła mieżone jest w luksach. [TODO: Rozwiń]
+Za pomiar natężenia światła odpowiedzialny jest moduł VEML7700. Podobnie jak BMP280 i AHT20 komunikuje się z mikrokontrolerem używając protokołu $I^2C$. Natężenie światła mierzone jest w luksach. [TODO: Rozwiń?]
 
 \section{Elementy dodatkowe}
 \subsection{Magistrala 1-Wire}
