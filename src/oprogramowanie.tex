@@ -160,7 +160,7 @@ pub fn read<D: DelayNs>(
 
 \subsection{Moduł z licznikiem Geigera-Müllera}
 \label{section:geiger_code}
-Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}. Sprzętowy licznik T1 mikrokontrolera skonfigurowany jest do zliczania impulsów zewnętrznych generowanych przez lampę Geigera-Müllera. Co sekundę zliczona wartość jest odczytywana i zapisywana do 60-elementowego bufora cyklicznego.
+Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}. Sprzętowy licznik T1 mikrokontrolera skonfigurowany jest do zliczania impulsów zewnętrznych generowanych przez lampę [AI mówi rurę] Geigera-Müllera. Co sekundę zliczona wartość jest odczytywana i zapisywana do 60-elementowego bufora cyklicznego.
 
 Funkcja \texttt{cpm} zwraca liczbę zliczeń na minutę poprzez ekstrapolację zsumowanych wartości bufora na pełną minutę, nawet w przypadku niepełnego zapełnienia bufora. Takie podejście ma dwie konsekwencje: przy czasie pracy krótszym niż minuta wynik może być obarczony większym błędem, natomiast przy pełnym buforze nagłe skoki wartości są wygładzane przez uśrednianie.
 
@@ -179,6 +179,7 @@ fn timer1_read_and_reset(tc1: &TC1) -> u16{
 
 \section{Komunikacja radiowa}
 \subsection{Serializacja danych}
+
 \subsection{Zabezpieczenie danych}
 [Nie zaimplementowane]
 \subsection{Transmisja danych}
