@@ -34,6 +34,7 @@ W początkowej wersji regulatora bocznikowego jako element sterujący pracą tra
 
 \begin{table}[h!]
     \centering
+    \caption{Napięcie wyjściowe U\textsubscript{Wy} regulatora bocznikowego przy użyciu diody Zenera i diody LED, dla prądu emitera I\textsubscript{E} tranzystora zwierającego. Do testu użyto zasilacza stałoprądowego.}
     \begin{tabular}{|r|c|c|}
         \hline
         I\textsubscript{E} [mA] & U\textsubscript{Wy} Zener [V]& U\textsubscript{Wy} LED [V] \\
@@ -46,7 +47,6 @@ W początkowej wersji regulatora bocznikowego jako element sterujący pracą tra
         500 & 3,00 & 2,68 \\
         \hline
     \end{tabular}
-    \caption{Napięcie wyjściowe U\textsubscript{Wy} regulatora bocznikowego przy użyciu diody Zenera i diody LED, dla prądu emitera I\textsubscript{E} tranzystora zwierającego. Do testu użyto zasilacza stałoprądowego.}
     \label{tab:zener-led-voltage-comparison}
 \end{table}
 
@@ -75,6 +75,7 @@ Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328
 
 \begin{table}[h!]
     \centering
+    \caption{Opis funkcji wyprowadzeń mikrokontrolera. Typy portów: I/O - cyfrowy port wejścia/wyjścia, Tn - podłączenie do wewnętrznego licznika n mikrokontrolera, ADC - wejście konwertera analogowo-cyfrowego.}
     \begin{tabular}{|r|c|p{0.65\linewidth}|}
         \hline
         Port & Przeznaczenie pinu & Funkcja \\
@@ -96,7 +97,6 @@ Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328
         PC1 & ADC & Badanie napięcia połączonych szeregowo superkondensatorów. \\
         \hline
     \end{tabular}
-    \caption{Opis funkcji wyprowadzeń mikrokontrolera. Typy portów: I/O - cyfrowy port wejścia/wyjścia, Tn - podłączenie do wewnętrznego licznika n mikrokontrolera, ADC - wejście konwertera analogowo-cyfrowego.}
     \label{tab:microcontroller_port_functions}
 \end{table}
 

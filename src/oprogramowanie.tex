@@ -165,7 +165,7 @@ Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}
 
 Funkcja \texttt{cpm} zwraca liczbę zliczeń na minutę poprzez ekstrapolację zsumowanych wartości bufora na pełną minutę, nawet w przypadku niepełnego zapełnienia bufora. Takie podejście ma dwie konsekwencje: przy czasie pracy krótszym niż minuta wynik może być obarczony większym błędem, natomiast przy pełnym buforze nagłe skoki wartości są wygładzane przez uśrednianie.
 
-Kod odpowiedzialny za odczyt i reset licznika T1 przedstawiono na listingu~\ref{lst:read_geiger_counter}. W celu zabezpieczenia przed przerwaniem wykonywania kodu zastosowano funkcję \texttt{interrupt::free} z biblioteki\texttt{avr\_device}.
+Kod odpowiedzialny za odczyt i reset licznika T1 przedstawiono na listingu~\ref{lst:read_geiger_counter}. W celu zabezpieczenia przed przerwaniem wykonywania kodu zastosowano funkcję \texttt{interrupt::free} z biblioteki \texttt{avr\_device}.
 
 \begin{lstlisting}[language=Rust, caption={Odczyt zliczeń licznika T1 mikrokontrolera},
                    label={lst:read_geiger_counter}]
