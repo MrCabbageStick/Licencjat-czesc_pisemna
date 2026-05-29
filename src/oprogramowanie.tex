@@ -20,7 +20,7 @@ Obsługa modułu AHT20 została zrealizowana w postaci struktury \texttt{Aht20} 
 
 Procedura inicjalizacji modułu, przedstawiona na listingu \ref*{lst:aht20_init}, rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, po którym następuje odczyt rejestru statusu. W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, a następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do jej wykonania:
 
-\begin{lstlisting}[language=Rust, caption={Inicjalizacja modułu AHT20}, label={lst:aht20_init}]
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Inicjalizacja modułu AHT20}, label={lst:aht20_init}]
 pub fn init<D: DelayNs>(
     &self, i2c: &mut I2c, 
     delay: &mut D
