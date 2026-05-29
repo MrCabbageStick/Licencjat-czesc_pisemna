@@ -21,20 +21,105 @@ i~ogrzewania.
 [TODO: Może jeszcze jeden akapit? Praca Wołodko? Modularność?]
 
 \section{Moduły pomiarowe}
-Do podstawowych wielkości fizycznych rejestrowanych przez 
-czujniki klimatyczne zalicza się przede wszystkim temperaturę, 
-wilgotność względną oraz ciśnienie atmosferyczne. Do pomiaru tych 
-wielkości coraz rzadziej wykorzystuje sie bezpośrednio połączone
-z~układem czujniki analogowe, a~są one wypierane przez moduły 
-integrujące elementy pomiarowe, dedykowane przetworniki
-analogowo-cyfrowe (ADC, ang. \textit{analog-digital converter})
-oraz fabryczne obwody kalibracyjne w~jednej obudowie. Pozwala to, 
-między innymi, wyeliminować problem zakłóceń elektromagnetycznych 
-indukowanych w~przewodach sygnałowych. Ponadto, projektanci modułów
-implementują algorytmy linearyzacji charakterystyk sensorów
-oraz filtry szumów analogowych po stronie samego modułu, pozwalając
-na wygodniejszych odczyt danych.
+Do podstawowych wielkości fizycznych rejestrowanych przez czujniki 
+klimatyczne zalicza się przede wszystkim temperaturę, wilgotność 
+względną oraz ciśnienie atmosferyczne. Do pomiaru tych wielkości 
+coraz rzadziej wykorzystuje się bezpośrednio połączone z~układem 
+czujniki analogowe --- są one wypierane przez moduły integrujące 
+elementy pomiarowe, dedykowane przetworniki analogowo-cyfrowe 
+(ADC, ang. \textit{analog-to-digital converter}) oraz fabryczne 
+obwody kalibracyjne w~jednej obudowie. Rozwiązanie takie pozwala 
+wyeliminować problem zakłóceń elektromagnetycznych indukowanych 
+w~przewodach sygnałowych. Ponadto projektanci modułów implementują 
+algorytmy linearyzacji charakterystyk sensorów oraz cyfrowe filtry 
+szumów, co umożliwia wygodny odczyt danych bezpośrednio przez 
+mikrokontroler.
 
+
+Na rynku dostępnych jest szereg modułów realizujących pomiary 
+klimatyczne, różniących się zarówno mierzonymi wielkościami 
+fizycznymi, jak i~osiąganą dokładnością, zakresem pomiarowym 
+oraz stopniem integracji. Wśród popularnych modułów pomiarowych 
+temperatury i~wilgotności wyróżnić można przede wszystkim rodzinę 
+DHT (DHT11, DHT22) firmy AOSONG, charakteryzującą się niskim kosztem 
+i~szeroką dostępnością, lecz ograniczoną dokładnością oraz 
+komunikacją przez dedykowany, jednobitowy protokół szeregowy. 
+Wyższą klasę dokładnościową reprezentują moduły szwajcarskiej firmy 
+Sensirion --- seria SHT3x (SHT30, SHT31, SHT35) oraz nowsza seria 
+SHT4x (SHT40, SHT41, SHT45), komunikujące się przez interfejs 
+\isqrc i~oferujące dokładność pomiaru 
+temperatury na poziomie $\pm0{,}2$\,°C. W~obszarze pomiaru 
+ciśnienia atmosferycznego dominuje oferta firmy Bosch Sensortec --- 
+od popularnego BMP180, przez powszechnie stosowany BMP280, po 
+nowsze BMP388 i~BMP390 charakteryzujące się wyższą rozdzielczością. 
+Firma Bosch oferuje również moduły z~rodziny BME (BME280, BME680, 
+BME688), łączące pomiar ciśnienia, temperatury i~wilgotności 
+w~jednej obudowie, przy czym moduły BME680 i~BME688 wyposażone są 
+dodatkowo w~czujnik gazów lotnych (VOC). Do pomiaru natężenia 
+oświetlenia w~zakresie widzialnym najczęściej stosuje się moduły 
+BH1750 firmy ROHM oraz VEML7700 firmy Vishay, oba komunikujące 
+się przez interfejs \isqrc.
+
+Zestawienie wybranych, reprezentatywnych modułów dostępnych na rynku 
+wraz z~ich podstawowymi parametrami przedstawiono 
+w~tabeli~\ref{tab:czujniki_rynek}.
+
+\begin{table}[h]
+\centering
+\caption{Zestawienie wybranych modułów pomiarowych dostępnych na rynku}
+\label{tab:czujniki_rynek}
+\small
+\begin{tabular}{|l|l|c|c|c|}
+\hline
+\textbf{Moduł} & \textbf{Wielkości mierzone} & \textbf{Interfejs} & \textbf{Uwagi} \\
+\hline
+DHT22 (AM2302)  & T, RH & 1-Wire & niski koszt \\
+\hline
+AHT20$^*$       & T, RH & I\textsuperscript{2}C & -- \\
+\hline
+SHT31           & T, RH & I\textsuperscript{2}C & wysoka stabilność \\
+\hline
+SHT40           & T, RH & I\textsuperscript{2}C & najnowsza generacja \\
+\hline
+DS18B20         & T & 1-Wire & wodo\-odporny wariant \\
+\hline
+BMP180          & T, p & I\textsuperscript{2}C & przestarzały \\
+\hline
+BMP280$^*$      & T, p & I\textsuperscript{2}C/SPI & niski pobór mocy \\
+\hline
+BME280          & T, RH, p & I\textsuperscript{2}C/SPI & 3 wielkości \\
+\hline
+BME688          & T, RH, p, VOC & I\textsuperscript{2}C/SPI & detekcja gazów \\
+\hline
+BH1750          & E\textsubscript{v} & I\textsuperscript{2}C & do 65\,535\,lx \\
+\hline
+VEML7700$^*$    & E\textsubscript{v} & I\textsuperscript{2}C & do 120\,000\,lx \\
+\hline
+\end{tabular}
+\medskip
+
+\raggedright\footnotesize
+T~-- temperatura, RH~-- wilgotność względna, p~-- ciśnienie atmosferyczne, 
+E\textsubscript{v}~-- natężenie oświetlenia; $^*$~moduły zastosowane 
+w~niniejszej pracy.
+\end{table}
+
+Do realizacji systemu opisanego w~niniejszej pracy wybrano moduły 
+AHT20, BMP280 oraz VEML7700. Kryterium doboru była dostępność 
+szczegółowej dokumentacji technicznej w~postaci kart katalogowych 
+producenta, umożliwiającej samodzielną implementację sterowników 
+programowych. Wszystkie trzy moduły komunikują się przez interfejs 
+\isqrc, co upraszcza schemat połączeń 
+elektrycznych --- wymagają one jedynie wspólnej magistrali 
+dwuprzewodowej. Funkcjonalnie moduły te wzajemnie się uzupełniają: 
+AHT20 realizuje pomiar temperatury i~wilgotności względnej, BMP280 
+dostarcza danych o~ciśnieniu atmosferycznym, natomiast VEML7700 
+rozszerza zestaw pomiarowy o~natężenie oświetlenia widzialnego. 
+Implementacja warstwy komunikacyjnej dla każdego z~modułów została 
+wykonana samodzielnie na podstawie specyfikacji protokołu 
+\isqrc oraz rejestrów opisanych 
+w~dokumentacji producenta, co szczegółowo omówiono 
+w~rozdziale~\ref{section:devices_programming}.
 
 \section{Zasilanie czujników}
 [Panele słoneczne i magazyn energii]
