@@ -40,7 +40,7 @@ pub fn init<D: DelayNs>(
 
 Odczyt surowych danych pomiarowych, przedstawiony na listingu~\ref{lst:aht20_read_raw}, realizowany jest w trzech etapach. W pierwszym kroku wysyłana jest komenda wyzwolenia pomiaru, po której, zgodnie z wymaganiami noty katalogowej, następuje odczekanie \SI{80}{\milli\second} do czasu jego zakończenia. Następnie odczytywany jest rejestr statusu w celu weryfikacji gotowości układu --- jeżeli bit zajętości jest ustawiony, funkcja zwraca błąd \texttt{Aht20Error::SensorBusy}. W przypadku pomyślnej weryfikacji dane pomiarowe zostają zaczytane do 7-bajtowego bufora i zwrócone w postaci struktury \texttt{Aht20RawData}. [TODO: może skrócić? Bo wsm to opis kodu]
 
-\begin{lstlisting}[language=Rust, caption={Odczyt surowych danych z modułu AHT20},
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt surowych danych z modułu AHT20},
                    label={lst:aht20_read_raw}]
 pub fn read_raw<I: I2c, D: DelayNs>(
     &self,
@@ -88,7 +88,7 @@ Dla wilgotności względnej podano wzór:
 
 Funkcje odpowiedzialne za konwersję przedstawiono na listingu~\ref{lst:aht20_data_conversion}. Wzory~\eqref{eq:aht20_temperature} i~\eqref{eq:aht20_humidity} zostały przekształcone w sposób niewymagający arytmetyki zmiennoprzecinkowej --- dzielenie przez $2^{20}$ zastąpiono przesunięciem bitowym w prawo o 20 pozycji i wykonuje sie ono dopiero po przemnożeniu surowej wartości. Wprowadzono ponadto stałą czasu kompilacji \texttt{PRECISION}, pozwalającą na skalowanie wyników i ograniczenie strat wynikających z arytmetyki całkowitoliczbowej. Przekazanie wartości \texttt{PRECISION} $= 1000$ skutkuje zwróceniem wyników w \si{\milli\degreeCelsius} dla funkcji \texttt{convert\_temperature} oraz w tysięcznych częściach procenta dla funkcji \texttt{convert\_humidity}. 
 
-\begin{lstlisting}[language=Rust, caption={Konwersja surowych danych z modułu AHT20},
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Konwersja surowych danych z modułu AHT20},
                    label={lst:aht20_data_conversion}]
 pub fn convert_temperature<const PRECISION: i64>(raw: i64) -> i16 {
     (((raw * 200 * PRECISION) >> 20) - 50 * PRECISION) as i16
@@ -101,7 +101,7 @@ pub fn convert_humidity<const PRECISION: i64>(raw: i64) -> i16 {
 
 Integralność odebranych danych może zostać zweryfikowana za pomocą 8-bitowej sumy kontrolnej CRC, znajdującej się w siódmym bajcie bufora odczytu. Weryfikacja realizowana jest przez funkcję \texttt{check\_crc}, przedstawioną na listingu~\ref{lst:aht20_crc_check}. [TODO: Dopytaj czy opis potrzebny]
 
-\begin{lstlisting}[language=Rust, caption={Sprawdzanie sumy kontrolnej danych modułu AHT20},
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Sprawdzanie sumy kontrolnej danych modułu AHT20},
                    label={lst:aht20_crc_check}]
 fn check_crc(bytes: &[u8; 7]) -> bool {
     let mut crc: u8 = 0xFF;
@@ -121,7 +121,7 @@ fn check_crc(bytes: &[u8; 7]) -> bool {
 
 Implementacja struktury \texttt{Aht20} została uzupełniona o funkcję \texttt{read} --- przedstawioną na listingu~\ref{lst:aht20_read} --- wykonującą surowy pomiar, weryfikację integralności danych oraz ich konwersję. Surowe wartości temperatury i wilgotności są 20-bitowymi liczbami całkowitymi bez znaku, które przed przetwarzaniem zostają rozszerzone do typu \texttt{i64}. Wybór tego typu podyktowany jest koniecznością uniknięcia przepełnienia podczas pośrednich operacji arytmetycznych. Należy zaznaczyć, że typ \texttt{i64} nie jest natywnie wspierany przez architekturę AVR i musi być realizowany programowo, co negatywnie wpływa na wydajność kodu. Wartości zwracane przez funkcję podane są z dokładnością do setnych części procenta i stopnia Celsjusza, opakowane wraz z flagą integralności danych w strukturę \texttt{Aht20Data}. [TODO: może nie dodawaj całości funkcji tylko ciekawe fragmenty]
 
-\begin{lstlisting}[language=Rust, caption={Odczyt danych modułu AHT20},
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt danych modułu AHT20},
                    label={lst:aht20_read}]
 pub fn read<D: DelayNs>(
     &self, i2c: &mut I2c, 
@@ -167,7 +167,7 @@ Funkcja \texttt{cpm} zwraca liczbę zliczeń na minutę poprzez ekstrapolację z
 
 Kod odpowiedzialny za odczyt i reset licznika T1 przedstawiono na listingu~\ref{lst:read_geiger_counter}. W celu zabezpieczenia przed przerwaniem wykonywania kodu zastosowano funkcję \texttt{interrupt::free} z biblioteki \texttt{avr\_device}.
 
-\begin{lstlisting}[language=Rust, caption={Odczyt zliczeń licznika T1 mikrokontrolera},
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt zliczeń licznika T1 mikrokontrolera},
                    label={lst:read_geiger_counter}]
 fn timer1_read_and_reset(tc1: &TC1) -> u16{
     avr_device::interrupt::free(|_| unsafe {
