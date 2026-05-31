@@ -1,0 +1,142 @@
+\subsection{Moduł AHT20 --- czujnik temperatury i wilgotności względnej}
+Obsługa modułu AHT20 została zrealizowana w postaci struktury \texttt{Aht20} wraz z jej implementacją. Komunikacja realizowana jest za pośrednictwem magistrali \isqrc poprzez wysyłanie dedykowanych komend sterujących. Moduł nie wymaga przesyłania danych konfiguracyjnych w trakcie działania. Zgodnie z notą katalogową producenta \cite{AHT20} urządzenie obsługuje następujący zestaw komend:
+\begin{itemize}
+    \item \textbf{Inicjalizacja} --- wymuszenie procedury kalibracji wewnętrznej układu;
+    \item \textbf{Wyzwolenie pomiaru} --- zainicjowanie akwizycji danych oraz ich zapis do wewnętrznej pamięci urządzenia;
+    \item \textbf{Odczyt statusu} --- weryfikacja stanu kalibracji układu oraz gotowości do przeprowadzenia kolejnego pomiaru.
+\end{itemize}
+
+Procedura inicjalizacji modułu, przedstawiona na listingu \ref*{lst:aht20_init}, rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, po którym następuje odczyt rejestru statusu. W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, a następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do jej wykonania:
+
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Inicjalizacja modułu AHT20}, label={lst:aht20_init}]
+pub fn init<D: DelayNs>(
+    &self, i2c: &mut I2c, 
+    delay: &mut D
+) -> Result<(), Aht20Error> {
+    delay.delay_ms(40);
+
+    let status = self.read_status(i2c)?;
+
+    if status & STATUS_CALIBRATED_BIT == 0 {
+        i2c.write(self.address, &COMMAND_INITIALIZE)?;
+        delay.delay_ms(10);
+    }
+
+    Ok(())
+}
+\end{lstlisting}
+
+Odczyt surowych danych pomiarowych, przedstawiony na listingu~\ref{lst:aht20_read_raw}, realizowany jest w trzech etapach. W pierwszym kroku wysyłana jest komenda wyzwolenia pomiaru, po której, zgodnie z wymaganiami noty katalogowej, następuje odczekanie \SI{80}{\milli\second} do czasu jego zakończenia. Następnie odczytywany jest rejestr statusu w celu weryfikacji gotowości układu --- jeżeli bit zajętości jest ustawiony, funkcja zwraca błąd \texttt{Aht20Error::SensorBusy}. W przypadku pomyślnej weryfikacji dane pomiarowe zostają zaczytane do 7-bajtowego bufora i zwrócone w postaci struktury \texttt{Aht20RawData}. [TODO: może skrócić? Bo wsm to opis kodu]
+
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt surowych danych z modułu AHT20},
+                   label={lst:aht20_read_raw}]
+pub fn read_raw<I: I2c, D: DelayNs>(
+    &self,
+    i2c: &mut I,
+    delay: &mut D,
+) -> Result<Aht20RawData, Aht20Error> {
+    i2c.write(self.address, &COMMAND_START_MEASUREMENT)?;
+
+    // Datasheet 5.4 step 3: wait 80 ms, then check busy bit
+    delay.delay_ms(80);
+
+    let status = self.read_status(i2c)?;
+    if status & STATUS_BUSY_BIT != 0 {
+        return Err(Aht20Error::SensorBusy);
+    }
+
+    let mut bytes = [0u8; 7];
+    i2c.read(self.address, &mut bytes)?;
+
+    Ok(Aht20RawData { bytes })
+}
+\end{lstlisting}
+
+Konwersja surowych danych odczytanych z modułu na stopnie Celsjusza oraz wilgotność względną jest możliwa przy wykorzystaniu wzorów dostarczonych w nocie katalogowej \cite{AHT20}. Dla temperatury podano wzór:
+\begin{equation}
+    T~[\si{\degreeCelsius}] = \frac{S_T}{2^{20}} \cdot 200 - 50
+    \label{eq:aht20_temperature}
+\end{equation}
+\noindent gdzie:
+\begin{itemize}
+    \item $T$ --- temperatura w stopniach Celsjusza,
+    \item $S_T$ --- surowa wartość temperatury odczytana z czujnika.
+\end{itemize}
+
+Dla wilgotności względnej podano wzór:
+\begin{equation}
+    RH~[\%] = \frac{S_{RH}}{2^{20}} \cdot 100\%
+    \label{eq:aht20_humidity}
+\end{equation}
+\noindent gdzie:
+\begin{itemize}
+    \item $RH$ --- wilgotność względna,
+    \item $S_{RH}$ --- surowa wartość wilgotności względnej odczytana z czujnika.
+\end{itemize}
+
+Funkcje odpowiedzialne za konwersję przedstawiono na listingu~\ref{lst:aht20_data_conversion}. Wzory~\eqref{eq:aht20_temperature} i~\eqref{eq:aht20_humidity} zostały przekształcone w sposób niewymagający arytmetyki zmiennoprzecinkowej --- dzielenie przez $2^{20}$ zastąpiono przesunięciem bitowym w prawo o 20 pozycji i wykonuje sie ono dopiero po przemnożeniu surowej wartości. Wprowadzono ponadto stałą czasu kompilacji \texttt{PRECISION}, pozwalającą na skalowanie wyników i ograniczenie strat wynikających z arytmetyki całkowitoliczbowej. Przekazanie wartości \texttt{PRECISION} $= 1000$ skutkuje zwróceniem wyników w \si{\milli\degreeCelsius} dla funkcji \texttt{convert\_temperature} oraz w tysięcznych częściach procenta dla funkcji \texttt{convert\_humidity}. 
+
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Konwersja surowych danych z modułu AHT20},
+                   label={lst:aht20_data_conversion}]
+pub fn convert_temperature<const PRECISION: i64>(raw: i64) -> i16 {
+    (((raw * 200 * PRECISION) >> 20) - 50 * PRECISION) as i16
+}
+
+pub fn convert_humidity<const PRECISION: i64>(raw: i64) -> i16 {
+    ((raw * 100 * PRECISION) >> 20) as i16
+}
+\end{lstlisting}
+
+Integralność odebranych danych może zostać zweryfikowana za pomocą 8-bitowej sumy kontrolnej CRC, znajdującej się w siódmym bajcie bufora odczytu. Weryfikacja realizowana jest przez funkcję \texttt{check\_crc}, przedstawioną na listingu~\ref{lst:aht20_crc_check}. [TODO: Dopytaj czy opis potrzebny]
+
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Sprawdzanie sumy kontrolnej danych modułu AHT20},
+                   label={lst:aht20_crc_check}]
+fn check_crc(bytes: &[u8; 7]) -> bool {
+    let mut crc: u8 = 0xFF;
+    for &byte in &bytes[..6] {
+        crc ^= byte;
+        for _ in 0..8 {
+            if crc & 0x80 != 0 {
+                crc = (crc << 1) ^ 0x31;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    crc == bytes[6]
+}
+\end{lstlisting}
+
+Implementacja struktury \texttt{Aht20} została uzupełniona o funkcję \texttt{read} --- przedstawioną na listingu~\ref{lst:aht20_read} --- wykonującą surowy pomiar, weryfikację integralności danych oraz ich konwersję. Surowe wartości temperatury i wilgotności są 20-bitowymi liczbami całkowitymi bez znaku, które przed przetwarzaniem zostają rozszerzone do typu \texttt{i64}. Wybór tego typu podyktowany jest koniecznością uniknięcia przepełnienia podczas pośrednich operacji arytmetycznych. Należy zaznaczyć, że typ \texttt{i64} nie jest natywnie wspierany przez architekturę AVR i musi być realizowany programowo, co negatywnie wpływa na wydajność kodu. Wartości zwracane przez funkcję podane są z dokładnością do setnych części procenta i stopnia Celsjusza, opakowane wraz z flagą integralności danych w strukturę \texttt{Aht20Data}. [TODO: może nie dodawaj całości funkcji tylko ciekawe fragmenty]
+
+\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt danych modułu AHT20},
+                   label={lst:aht20_read}]
+pub fn read<D: DelayNs>(
+    &self, i2c: &mut I2c, 
+    delay: &mut D
+) -> Result<Aht20Data, Aht20Error> {
+    let raw = self.read_raw(i2c, delay)?;
+
+    let crc_passed = Self::check_crc(&raw.bytes);
+
+    // Humidity: bits [39:20] of the data payload (bytes 1-3)
+    let raw_humidity = 0i64
+        | ((raw.bytes[1] as i64) << 12)
+        | ((raw.bytes[2] as i64) << 4)
+        | ((raw.bytes[3] as i64) >> 4);
+
+    // Temperature: bits [19:0] of the data payload (bytes 3-5)
+    let raw_temperature = 0i64
+        | ((raw.bytes[3] as i64 & 0x0F) << 16)
+        | ((raw.bytes[4] as i64) << 8)
+        | (raw.bytes[5] as i64);
+
+    Ok(Aht20Data {
+        temperature: 
+            Self::convert_temperature::<100>(raw_temperature),
+        humidity: 
+            Self::convert_humidity::<100>(raw_humidity),
+        crc_passed,
+    })
+}
+\end{lstlisting}

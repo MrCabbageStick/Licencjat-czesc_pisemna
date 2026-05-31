@@ -1,0 +1,147 @@
+\subsection{Moduł BMP280}
+Moduł BMP280 jest obsługiwany przez strukturę \texttt{Bmp280},
+pokazaną na listingu~\ref{lst:bmp280_struct}. Zawiera ona pole
+adresu urządzenia na magistrali \isqrc, pole przechowujące dane
+kompensacyjne pomiaru oraz parametr typu \texttt{CONFIG} zawarty
+w~polu \texttt{PhantomData} o~zerowym rozmiarze w~pamięci.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Bmp280}},
+    label={lst:bmp280_struct}
+]
+pub struct Bmp280<CONFIG>{
+    address: u8,
+    compensations: Option<Bmp280Compensations>,
+    _config: PhantomData<CONFIG>,
+}
+\end{lstlisting}
+
+Dane kompensacyjne zapisywane są do struktury
+\texttt{Bmp280Compensations}, składającej się z~dwunastu
+szesnastobitowych pól przechowujących wartości kompensacyjne.
+Są one wykorzystywane przy przeliczaniu surowych danych odczytanych
+z~modułu na temperaturę w~stopniach Celsjusza oraz ciśnienie
+w~paskalach. Implementacja struktury udostępnia funkcję powiązaną
+\texttt{read\_from\_i2c}, odczytującą 24~bajty z~pamięci modułu
+BMP280 i~przypisującą je do poszczególnych pól struktury.
+Implementacja tej funkcji przedstawiona jest na
+listingu~\ref{lst:bmp280compensations_read}, a~nazwy pól struktury
+przyjęto zgodnie z~notą katalogową~\cite{bmp280_datasheet}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Odczyt danych kompensacyjnych dla modułu BMP280},
+    label={lst:bmp280compensations_read}
+]
+pub fn read_from_i2c(address: u8, i2c: &mut I2c) 
+    -> Result<Self, i2c::Error>{
+
+    let mut buffer = [0u8; N_COMPENSATION_BYTES];
+
+    i2c.write_read(
+        address, 
+        &[COMPENSATION_START_ADDRESS], 
+        &mut buffer
+    )?;
+
+    Ok(Self{
+        dig_t1: u16::from_le_bytes([buffer[0], buffer[1]]),
+        dig_t2: i16::from_le_bytes([buffer[2], buffer[3]]),
+        dig_t3: i16::from_le_bytes([buffer[4], buffer[5]]),
+
+        dig_p1: u16::from_le_bytes([buffer[6], buffer[7]]),
+        // ...
+        dig_p9: i16::from_le_bytes([buffer[22], buffer[23]]),
+    })
+}
+\end{lstlisting}
+
+Konfiguracja modułu BMP280 odbywa się poprzez zapis 8-bitowych
+wartości do rejestrów \texttt{CTRL\_MEAS} i~\texttt{CONFIG}. Wartości
+te pozyskiwane są z~typu implementującego cechę \texttt{Config},
+widoczną na listingu~\ref{lst:bmp280_config}. Cecha ta definiuje
+skojarzone typy odpowiedzialne za poszczególne ustawienia modułu:
+\begin{itemize}
+    \item \texttt{TempOversampling} -- określa stopień nadpróbkowania
+    pomiaru temperatury,
+    \item \texttt{PressOversampling} -- określa stopień nadpróbkowania
+    pomiaru ciśnienia,
+    \item \texttt{PowerMode} -- określa tryb pracy urządzenia,
+    \item \texttt{Standby} -- określa odstęp czasowy pomiędzy pomiarami,
+    \item \texttt{IIR} -- określa stałą filtra IIR.
+\end{itemize}
+
+Każdy z~tych typów ograniczony jest do odpowiedniej cechy udostępniającej
+stałą \texttt{BITS}, reprezentującą wartość bitową zgodną z~notą
+katalogową. Wymagane wartości rejestrów przechowywane są w~stałych
+\texttt{CTRL\_MEAS\_VALUE} i~\texttt{CONFIG\_VALUE}, których wartości
+powstają przez przesunięcie bitowe stałych \texttt{BITS}
+na odpowiednie pozycje i~złożenie ich operatorem alternatywy bitowej.
+Rejestr \texttt{CONFIG\_VALUE} dodatkowo określa protokół komunikacyjny
+urządzenia -- pole \texttt{EN\_SPI} ustawione jest na~0, co wymusza
+użycie protokołu \isqrc.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Cecha \texttt{Config} używana do konfiguracji BMP280},
+    label={lst:bmp280_config}
+]
+pub trait Config{
+    type TempOversampling: Oversampling;
+    type PressOversampling: Oversampling;
+    type PowerMode: PowerMode;
+    type Standby: Standby;
+    type IIR: IIRConstant;
+
+    const CTRL_MEAS_VALUE: u8 = 
+        Self::TempOversampling::BITS << TEMP_OVERSAMPLING_OFFSET
+        | Self::PressOversampling::BITS << PRESS_OVERSAMPLING_OFFSET
+        | Self::PowerMode::BITS << POWER_MODE_OFFSET;
+
+    const CONFIG_VALUE: u8 =
+        Self::Standby::BITS << STANDBY_OFFSET
+        | Self::IIR::BITS << IIR_CONSTANT_OFFSET
+        // Disable SPI mode
+        | 0b0 << EN_SPI_OFFSET;
+}
+
+pub trait Oversampling{ const BITS: u8; }
+pub trait PowerMode{ const BITS: u8; }
+pub trait Standby{ const BITS: u8; }
+pub trait IIRConstant{ const BITS: u8; }
+\end{lstlisting}
+
+Przykładową implementację cechy \texttt{Config} oraz cech
+odpowiedzialnych za poszczególne wartości bitowe przedstawiono
+na listingu~\ref{lst:bmp280_config_examples}. Definicje pomocniczych
+cech \texttt{Oversampling}, \texttt{PowerMode}, \texttt{Standby}
+i~\texttt{IIRConstant} zostały pominięte, ponieważ są już widoczne
+na listingu~\ref{lst:bmp280_config}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Przykładowa implementacja cech konfiguracyjnych modułu BMP280},
+    label={lst:bmp280_config_examples}
+]
+pub struct DefaultConfig;
+
+impl Config for DefaultConfig{
+    type TempOversampling = OversamplingX1;
+    type PressOversampling = OversamplingX2;
+    type PowerMode = PowerModeNormal;
+
+    type Standby = Standby0_5ms;
+    type IIR = IIROff;
+}
+
+pub struct OversamplingX1;
+pub struct OversamplingX2;
+impl Oversampling for OversamplingX1{  const BITS: u8 = 0b001; }
+impl Oversampling for OversamplingX2{  const BITS: u8 = 0b010; }
+
+pub struct PowerModeNormal;
+impl PowerMode for PowerModeNormal{ const BITS: u8 = 0b11; }
+
+pub struct Standby0_5ms;
+impl Standby for Standby0_5ms{   const BITS: u8 = 0b000; }
+
+pub struct IIROff;
+impl IIRConstant for IIROff{ const BITS: u8 = 0b000; }
+\end{lstlisting}
