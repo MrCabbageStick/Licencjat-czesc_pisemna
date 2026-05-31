@@ -122,7 +122,37 @@ w~dokumentacji producenta, co szczegółowo omówiono
 w~rozdziale~\ref{section:devices_programming}.
 
 \section{Zasilanie czujników}
-[Panele słoneczne i magazyn energii]
+Sposób zasilania czujników klimatycznych jest uzależniony od miejsca 
+ich docelowego zastosowania. W~przypadku montażu wewnętrznego 
+możliwe jest wykorzystanie sieciowego zasilacza impulsowego 
+o~napięciu wyjściowym dobranym do wymagań układu, jak również 
+jednorazowych baterii alkalicznych. W~przypadku montażu zewnętrznego 
+doprowadzenie zasilania przewodem bywa często niepraktyczne lub 
+niemożliwe. Alternatywę stanowią baterie jednorazowe, jednak wymagają 
+one okresowej wymiany. Rozwiązaniem przyjętym w~niniejszym projekcie 
+jest zasilanie z~paneli fotowoltaicznych.
+
+Zastosowanie ogniw fotowoltaicznych wymaga jednak uzupełnienia układu 
+o~magazyn energii umożliwiający podtrzymanie pracy czujnika w~okresach 
+braku nasłonecznienia. Powszechnie stosowanym rozwiązaniem są ogniwa 
+litowo-jonowe, których wybór uzasadnia malejący koszt, szeroka 
+dostępność rynkowa oraz rosnąca gęstość energetyczna 
+\translation{energy density}. Ich wadami są jednak stosunkowo 
+złożony układ ładowania i~zabezpieczenia przed nadmiernym 
+rozładowaniem oraz ograniczona odporność na duże wahania temperatur.
+
+Wymienionych ograniczeń pozbawione są superkondensatory. Podobnie 
+jak ogniwa litowo-jonowe, charakteryzują się one malejącym kosztem 
+i~rosnącą dostępnością, a~ponadto wykazują znacznie lepszą odporność 
+na wahania temperatury oraz nie wymagają ograniczenia głębokości 
+rozładowania. Układ ładowania sprowadza się w~ich przypadku wyłącznie 
+do zabezpieczenia przed przekroczeniem maksymalnego napięcia na 
+okładkach, co omówiono w~podrozdziale~\ref{section:supercapacitor_charging}.  
+Cechy te czynią superkondensatory rozwiązaniem szczególnie 
+odpowiednim dla zewnętrznych czujników zasilanych fotowoltaicznie.
+Istotną wadą superkondensatorów pozostaje jednak znacznie mniejsza 
+gęstość energetyczna w~porównaniu z~ogniwami litowo-jonowymi, co 
+ogranicza ich zastosowanie do urządzeń o~niskim poborze mocy.
 
 \chapter{Programowanie systemów wbudowanych}
 \section{Języki programowania}
