@@ -1,0 +1,106 @@
+Wybór odpowiedniego języka programowania ma kluczowe znaczenie dla 
+efektywności procesu wytwarzania oprogramowania, stabilności systemu 
+oraz optymalnego wykorzystania ograniczonych zasobów sprzętowych 
+mikrokontrolera. W architekturze systemów wbudowanych tradycyjnie
+dominują języki niskopoziomowe, jednak rozwój technologii oraz wzrost 
+mocy obliczeniowej układów scalonych przyczyniły się do popularyzacji 
+alternatywnych rozwiązań. 
+W niniejszym rozdziale dokonano przeglądu najpopularniejszych 
+języków programowania stosowanych w tej dziedzinie, ze szczególnym 
+uwzględnieniem języka Rust, który został wykorzystany w części 
+praktycznej pracy.
+
+\subsubsection{Język C}
+Język C od dekad pozostaje standardem branżowym w dziedzinie systemów 
+wbudowanych. Jego główną zaletą jest wysoka wydajność, minimalny narzut
+pamięciowy oraz bezpośredni dostęp do rejestrów procesora i zasobów 
+sprzętowych. Kod źródłowy kompilowany jest bezpośrednio do kodu 
+maszynowego, co zapewnia przewidywalność czasu wykonania 
+(ang. \textit{deterministic execution time}). Ponadto, producenci 
+mikrokontrolerów dostarczają dedykowane biblioteki 
+HAL (ang. \textit{Hardware Abstraction Layer}) najczęściej właśnie 
+w języku C.
+
+Główną wadą języka C jest brak wbudowanych mechanizmów bezpieczeństwa 
+pamięci. Problemy takie jak przepełnienie bufora 
+(ang. \textit{buffer overflow}), wycieki pamięci 
+(ang. \textit{memory leaks}) czy usterki typu \textit{use-after-free} 
+muszą być kontrolowane bezpośrednio przez programistę, co zwiększa 
+ryzyko wystąpienia krytycznych błędów w działaniu urządzenia.
+
+\subsubsection{Język C++}
+Język C++ wprowadza do świata systemów wbudowanych paradygmat 
+programowania obiektowego (OOP) oraz mechanizmy abstrakcji, takie 
+jak szablony (ang. \textit{templates}) czy polimorfizm. 
+Pozwala to na lepszą strukturyzację i modułowość kodu, co jest 
+szczególnie istotne w złożonych projektach. 
+
+W kontekście mikrokontrolerów stosuje się zazwyczaj ograniczony 
+podzbiór języka C++ (tzw. \textit{Embedded C++}). 
+Często rezygnuje się z dynamicznej alokacji pamięci 
+(operator \textit{new/delete}) oraz obsługi wyjątków 
+(ang. \textit{exceptions}), ponieważ mechanizmy te wprowadzają 
+nieprzewidywalność czasu wykonania programu i mogą prowadzić 
+do fragmentacji pamięci RAM.
+
+\subsubsection{MicroPython}
+MicroPython to zoptymalizowana implementacja języka Python 3, 
+stworzona z myślą o pracy na nowoczesnych mikrokontrolerach 
+(np. ESP32, STM32). Jego kluczową zaletą jest niezwykle wysoki poziom 
+abstrakcji, prostota składni oraz interpretacja kodu w czasie 
+rzeczywistym, co drastycznie skraca czas tworzenia prototypów.
+
+Niestety, jako język interpretowany, MicroPython charakteryzuje się 
+znacznie niższą wydajnością i większym zużyciem pamięci RAM oraz Flash 
+w porównaniu do języków kompilowanych. Obecność mechanizmu 
+odśmiecania pamięci (ang. \textit{Garbage Collector}) wyklucza go 
+z zastosowań w systemach czasu rzeczywistego (RTOS), gdzie wymagany 
+jest rygorystyczny determinizm czasowy.
+
+\subsubsection{Język Rust}
+Język Rust reprezentuje nowoczesne podejście do programowania 
+systemowego, łącząc wydajność i niskopoziomową kontrolę znaną 
+z języków C/C++ z nowoczesnymi mechanizmami bezpieczeństwa. 
+W kontekście systemów wbudowanych, kluczową cechą Rusta jest koncepcja
+zarządzania pamięcią oparta na systemie własności 
+(ang. \textit{ownership}) oraz cyklach życia obiektów 
+(ang. \textit{lifetimes}). Walidacja tych reguł odbywa się na etapie 
+kompilacji (ang. \textit{compile-time}), co eliminuje całą klasę 
+błędów związanych z dostępem do pamięci bez wprowadzania narzutu 
+w czasie wykonywania programu (ang. \textit{zero-cost abstractions}) 
+oraz bez użycia mechanizmu \textit{Garbage Collector}.
+
+Dodatkowo, ekosystem Rusta oferuje zaawansowane narzędzia menedżera 
+pakietów \texttt{cargo}, co ułatwia zarządzanie zależnościami oraz 
+automatyzację testów. Choć próg wejścia w ten język jest wysoki ze 
+względu na restrykcyjny kompilator, bezpieczeństwo kodu i odporność 
+na błędy współbieżności (ang. \textit{data races}) sprawiają, 
+że staje się on coraz częstszym wyborem w projektowaniu 
+niezawodnych systemów wbudowanych.
+
+\subsubsection{Podsumowanie i porównanie cech języków}
+W celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
+w tabeli \ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
+omawianych języków programowania.
+
+\begin{table}[h!]
+\centering
+\caption{Porównanie języków programowania w systemach wbudowanych.}
+\label{tab:porownanie_jezykow}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Cecha / Kryterium} & \textbf{Język C} & \textbf{Język C++} & \textbf{MicroPython} & \textbf{Język Rust} \\ \hline
+Wydajność obliczeniowa & Bardzo wysoka & Bardzo wysoka & Niska & Bardzo wysoka \\ \hline
+Zarządzanie pamięcią & Ręczne & Ręczne / Obiektowe & Garbage Collector & Statyczne (Kompilator) \\ \hline
+Bezpieczeństwo pamięci & Brak & Brak / Ograniczone & Wysokie & Całkowite (Safe Rust) \\ \hline
+Poziom abstrakcji & Niski & Średni/Wysoki & Bardzo wysoki & Wysoki \\ \hline
+Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \hline
+\end{tabular}
+\end{table}
+
+Jak wynika z powyższego porównania, język Rust stanowi optymalny 
+kompromis pomiędzy bezkompromisową wydajnością i determinizmem 
+cechującym język C, a nowoczesnymi mechanizmami bezpieczeństwa 
+i wysokim poziomem abstrakcji. Z tego względu został on wybrany 
+jako główne narzędzie programistyczne w realizacji projektu 
+praktycznego.

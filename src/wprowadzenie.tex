@@ -157,7 +157,156 @@ gęstość energetyczna w~porównaniu z~ogniwami litowo-jonowymi, co
 ogranicza ich zastosowanie do urządzeń o~niskim poborze mocy.
 
 \chapter{Programowanie systemów wbudowanych}
+System wbudowany \translation{embedded system} stanowi 
+wyspecjalizowany system komputerowy, będący integralną częścią 
+większego układu mechanicznego lub elektronicznego. 
+W~przeciwieństwie do komputerów osobistych ogólnego przeznaczenia 
+\translation{general-purpose computers}, systemy te są projektowane 
+do realizacji ściśle zdefiniowanych zadań, co pozwala na optymalizację 
+pod kątem wydajności, kosztów oraz zużycia energii. 
+Współcześnie systemy wbudowane znajdują zastosowanie w~szerokim 
+spektrum urządzeń --- od sprzętu gospodarstwa domowego (AGD), 
+po zaawansowane systemy sterowania w~przemyśle 
+i~motoryzacji~\cite{Programming_Embedded_Systems}.
+
+\section{Charakterystyka układów sterujących}
+Kluczowym elementem decyzyjnym systemu wbudowanego jest układ scalony 
+o~wysokim stopniu integracji --- mikrokontroler lub mikroprocesor. 
+
+Mikroprocesor (MPU) integruje jednostkę centralną (CPU) oraz rejestry 
+danych, jednak do poprawnej pracy wymaga zewnętrznych komponentów, 
+takich jak pamięć operacyjna (RAM), pamięć nieulotna oraz kontrolery 
+peryferiów. Z~kolei mikrokontroler (MCU) jest układem autonomicznym, 
+który w~jednej obudowie zawiera procesor, pamięć oraz układy 
+wejścia-wyjścia. Ze względu na wysoką integrację, niski koszt 
+implementacji oraz uproszczoną architekturę sprzętową, 
+w~niniejszym projekcie zdecydowano się na wykorzystanie 
+mikrokontrolera.
+
+Wybór konkretnego układu zależy od specyfiki projektu. 
+Do najpopularniejszych rodzin mikrokontrolerów należą:
+\begin{itemize}
+    \item \textbf{Rodzina AVR (Atmel/Microchip):} 8-bitowe układy 
+    charakteryzujące się prostotą programowania, spopularyzowane 
+    dzięki platformie Arduino. Są optymalne dla prostych systemów 
+    sterowania.
+    \item \textbf{Rodzina ESP (Espressif Systems):} Układy ESP8266 
+    oraz ESP32, które zrewolucjonizowały rynek dzięki zintegrowanym 
+    modułom łączności bezprzewodowej Wi-Fi oraz Bluetooth, 
+    przy zachowaniu bardzo korzystnego stosunku ceny do wydajności.
+    \item \textbf{STM32 (STMicroelectronics):} 32-bitowe mikrokontrolery
+    oparte na architekturze ARM Cortex-M, oferujące wysoką moc 
+    obliczeniową i bogaty zestaw peryferiów, powszechnie stosowane 
+    w~rozwiązaniach profesjonalnych.
+\end{itemize}
+
+Ze względu na niski stopień skomplikowania projektu wybrany został 
+procesor \textbf{ATmega328p} firmy Atmel, którego dokładniejszy 
+opis przedstawiono w podrozdziale~\ref{section:atmega328p}.
+
 \section{Języki programowania}
-[C, C++, Rust, MicroPython, co do jakiego mikrokontrolera]
+Wybór odpowiedniego języka programowania ma kluczowe znaczenie dla 
+efektywności procesu wytwarzania oprogramowania, stabilności systemu 
+oraz optymalnego wykorzystania ograniczonych zasobów sprzętowych 
+mikrokontrolera. W~architekturze systemów wbudowanych tradycyjnie
+dominują języki niskopoziomowe, jednak rozwój technologii oraz wzrost 
+mocy obliczeniowej układów scalonych przyczyniły się do popularyzacji 
+alternatywnych rozwiązań.
+
+\subsection{Język C}
+Język C od dekad pozostaje standardem branżowym w~dziedzinie systemów 
+wbudowanych. Jego główną zaletą jest wysoka wydajność, minimalny narzut
+pamięciowy oraz bezpośredni dostęp do rejestrów procesora i~zasobów 
+sprzętowych. Kod źródłowy kompilowany jest bezpośrednio do kodu 
+maszynowego, co zapewnia przewidywalność czasu wykonania 
+\translation{deterministic execution time}. Ponadto, producenci 
+mikrokontrolerów dostarczają dedykowane biblioteki 
+HAL \translation{Hardware Abstraction Layer} najczęściej właśnie 
+w~języku C.
+
+Główną wadą języka C jest brak wbudowanych mechanizmów bezpieczeństwa 
+pamięci. Problemy takie jak przepełnienie bufora 
+\translation{buffer overflow}, wycieki pamięci 
+\translation{memory leak} czy usterki typu \textit{use-after-free} 
+muszą być kontrolowane bezpośrednio przez programistę, co zwiększa 
+ryzyko wystąpienia krytycznych błędów w~działaniu urządzenia.
+
+\subsection{Język C++}
+Język C++ wprowadza do świata systemów wbudowanych paradygmat 
+programowania obiektowego (OOP) oraz mechanizmy abstrakcji, takie 
+jak szablony \translation{templates} czy polimorfizm. 
+Pozwala to na lepszą strukturyzację i~modularność kodu, co jest 
+szczególnie istotne w~złożonych projektach. 
+
+W kontekście mikrokontrolerów stosuje się zazwyczaj ograniczony 
+podzbiór języka C++ (tzw. \textit{Embedded C++}). 
+Często rezygnuje się z dynamicznej alokacji pamięci 
+(operator \textit{new/delete}) oraz obsługi wyjątków 
+(ang. \textit{exceptions}), ponieważ mechanizmy te wprowadzają 
+nieprzewidywalność czasu wykonania programu i~mogą prowadzić 
+do fragmentacji pamięci RAM.
+
+\subsection{MicroPython}
+MicroPython to zoptymalizowana implementacja języka Python 3, 
+stworzona z~myślą o~pracy na nowoczesnych mikrokontrolerach 
+(np. ESP32, STM32). Jego kluczową zaletą jest niezwykle wysoki poziom 
+abstrakcji, prostota składni oraz interpretacja kodu w~czasie 
+rzeczywistym, co drastycznie skraca czas tworzenia prototypów.
+
+Niestety, jako język interpretowany, MicroPython charakteryzuje się 
+znacznie niższą wydajnością i~większym zużyciem pamięci RAM oraz Flash 
+w~porównaniu do języków kompilowanych. Obecność mechanizmu 
+odśmiecania pamięci \translation{Garbage Collector} wyklucza go 
+z~zastosowań w~systemach czasu rzeczywistego (RTOS), gdzie wymagany 
+jest rygorystyczny determinizm czasowy.
+
+\subsection{Język Rust}
+Język Rust reprezentuje nowoczesne podejście do programowania 
+systemowego, łącząc wydajność i~niskopoziomową kontrolę znaną 
+z~języków C/C++ z~nowoczesnymi mechanizmami bezpieczeństwa. 
+W~kontekście systemów wbudowanych, kluczową cechą Rusta jest koncepcja
+zarządzania pamięcią oparta na systemie własności 
+\translation{ownership} oraz cyklach życia obiektów 
+\translation{lifetimes}. Walidacja tych reguł odbywa się na etapie 
+kompilacji \translation{compile-time}, co eliminuje całą klasę 
+błędów związanych z~dostępem do pamięci bez wprowadzania narzutu 
+w~czasie wykonywania programu \translation{zero-cost abstractions} 
+oraz bez użycia mechanizmu \textit{Garbage Collector}.
+
+Dodatkowo, ekosystem języka Rust oferuje zaawansowane narzędzia menedżera 
+pakietów \texttt{cargo}, co ułatwia zarządzanie zależnościami oraz 
+automatyzację testów. Choć próg wejścia~w ten język jest wysoki ze 
+względu na restrykcyjny kompilator, bezpieczeństwo kodu i~odporność 
+na błędy współbieżności \translation{data races} sprawiają, 
+że staje się on coraz częstszym wyborem w projektowaniu 
+niezawodnych systemów wbudowanych.
+
+\subsection{Podsumowanie i porównanie cech języków}
+W~celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
+w~tabeli \ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
+omawianych języków programowania.
+
+\begin{table}[h!]
+\centering
+\caption{Porównanie języków programowania w systemach wbudowanych.}
+\label{tab:porownanie_jezykow}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Cecha / Kryterium} & \textbf{Język C} & \textbf{Język C++} & \textbf{MicroPython} & \textbf{Język Rust} \\ \hline
+Wydajność obliczeniowa & Bardzo wysoka & Bardzo wysoka & Niska & Bardzo wysoka \\ \hline
+Zarządzanie pamięcią & Ręczne & Ręczne / Obiektowe & Garbage Collector & Statyczne (Kompilator) \\ \hline
+Bezpieczeństwo pamięci & Brak & Brak / Ograniczone & Wysokie & Całkowite (Safe Rust) \\ \hline
+Poziom abstrakcji & Niski & Średni/Wysoki & Bardzo wysoki & Wysoki \\ \hline
+Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \hline
+\end{tabular}
+\end{table}
+
+Jak wynika z~powyższego porównania, język Rust stanowi optymalny 
+kompromis pomiędzy bezkompromisową wydajnością i~determinizmem 
+cechującym język C, a~nowoczesnymi mechanizmami bezpieczeństwa 
+i~wysokim poziomem abstrakcji. Z~tego względu został on wybrany 
+jako główne narzędzie programistyczne w~realizacji projektu 
+praktycznego.
+
 \section{Obsługa magistrali}
 [Opisz czym jest I2C z perspektywy kodu]
