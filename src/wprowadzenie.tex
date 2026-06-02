@@ -1,4 +1,14 @@
 \chapter{Wprowadzenie do tematyki}
+Rozdział pierwszy wprowadza w~tematykę pracy, przedstawiając kontekst 
+zastosowania czujników klimatycznych we współczesnej inżynierii oraz 
+uzasadniając dobór komponentów pomiarowych i~energetycznych 
+wykorzystanych w projekcie. Omówiono dostępne na rynku moduły 
+realizujące pomiary temperatury, wilgotności, ciśnienia 
+atmosferycznego i~natężenia oświetlenia, a~także zagadnienia związane 
+z~zasilaniem urządzeń zewnętrznych ze źródeł fotowoltaicznych, 
+w~tym porównanie ogniw litowo-jonowych z~superkondensatorami jako 
+magazynów energii.
+
 \section{Czujniki klimatyczne}
 Współczesny rozwój technologiczny w~połączeniu z~postępującymi
 zamianami klimatu oraz rosnącą automatyzacją procesów 
@@ -17,6 +27,33 @@ zanieczyszczeń powietrza, natomiast w~systemach zarządzania
 budynkami \translation{Building Management Systems} stanowią 
 podstawę sterowania procesami klimatyzacji, wentylacji 
 i~ogrzewania.
+
+Na rynku konsumenckim dostępna jest szeroka gama urządzeń służących 
+do monitorowania parametrów środowiskowych w~warunkach domowych, 
+określanych potocznie mianem stacji pogodowych. Urządzenia tego typu 
+stanowią połączenie kilku przyrządów pomiarowych —-- termometru, 
+higrometru i~barometru —-- i~najczęściej wyposażone są w funkcję prognozy
+pogody wyświetlanej w formie symboli, opartej na zmianach ciśnienia 
+atmosferycznego. 
+Współczesne stacje cyfrowe działają w~oparciu o~sygnał radiowy, 
+oferują większą precyzję oraz dodatkowe funkcje, takie jak zapisywanie 
+danych historycznych czy jednoczesny odczyt z~kilku czujników zewnętrznych. 
+Do popularnych producentów tego segmentu należą Oregon Scientific, 
+TFA Dostmann, Netatmo oraz Bresser. 
+Rozwiązania klasy wyższej, takie jak stacja Netatmo, integrują się 
+z~platformami inteligentnego domu i~umożliwiają monitorowanie dodatkowych 
+parametrów, jak stężenie CO\textsubscript{2} czy poziom hałasu, 
+prezentując dane za pośrednictwem aplikacji mobilnej. 
+Pomimo rosnącej funkcjonalności, urządzenia konsumenckie charakteryzują 
+się ograniczoną dokładnością pomiarową —-- precyzyjne modele cyfrowe 
+osiągają granicę błędu temperatury na poziomie 1°C i~wilgotności 
+w~granicach 3--5\%, co w~zastosowaniach wymagających wysokiej dokładności 
+lub ciągłej akwizycji danych jest niewystarczające. 
+Stanowi to bezpośrednią motywację do budowy dedykowanego systemu 
+pomiarowego opartego na precyzyjnych modułach elektronicznych, 
+opisanego w~niniejszej pracy.
+
+[TODO: Sprawdź dokładność]
 
 [TODO: Może jeszcze jeden akapit? Praca Wołodko? Modularność?]
 
@@ -157,6 +194,8 @@ gęstość energetyczna w~porównaniu z~ogniwami litowo-jonowymi, co
 ogranicza ich zastosowanie do urządzeń o~niskim poborze mocy.
 
 \chapter{Programowanie systemów wbudowanych}
+[TODO: nie wiem czy wstęp do rozdziału nie jest zbyt różny od wstępu 
+do rozdziału 1.]
 System wbudowany \translation{embedded system} stanowi 
 wyspecjalizowany system komputerowy, będący integralną częścią 
 większego układu mechanicznego lub elektronicznego. 
@@ -284,7 +323,8 @@ niezawodnych systemów wbudowanych.
 \subsection{Podsumowanie i porównanie cech języków}
 W~celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
 w~tabeli \ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
-omawianych języków programowania.
+omawianych języków programowania. 
+[TODO: Przerób tabelę]
 
 \begin{table}[h!]
 \centering
@@ -292,7 +332,7 @@ omawianych języków programowania.
 \label{tab:porownanie_jezykow}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
-\textbf{Cecha / Kryterium} & \textbf{Język C} & \textbf{Język C++} & \textbf{MicroPython} & \textbf{Język Rust} \\ \hline
+\textbf{Cecha / Kryterium} & \textbf{C} & \textbf{C++} & \textbf{MicroPython} & \textbf{Rust} \\ \hline
 Wydajność obliczeniowa & Bardzo wysoka & Bardzo wysoka & Niska & Bardzo wysoka \\ \hline
 Zarządzanie pamięcią & Ręczne & Ręczne / Obiektowe & Garbage Collector & Statyczne (Kompilator) \\ \hline
 Bezpieczeństwo pamięci & Brak & Brak / Ograniczone & Wysokie & Całkowite (Safe Rust) \\ \hline
@@ -309,4 +349,54 @@ jako główne narzędzie programistyczne w~realizacji projektu
 praktycznego.
 
 \section{Obsługa magistrali}
-[Opisz czym jest I2C z perspektywy kodu]
+Komunikacja z~modułami pomiarowymi może odbywać się 
+za pośrednictwem wielu protokołów. Głównymi z nich
+są: 
+\begin{itemize}
+    \item \textbf{USART} --- asynchroniczna lub synchroniczna magistrala
+    2-kierunkowa, korzystająca z~2~połączeń do transmisji danych ---
+    nadawczego (TX) i~odbiorczego (RX). W~trybie synchronicznym
+    wykorzystywane jest dodatkowe połączenie zegarowe (XCK).
+    Przesyła dane w~trybie \textit{full duplex}, w~konfiguracji
+    \textit{peer-to-peer}.
+    Zaprojektowana do użytku w~krótkich połączeniach,
+    najlepiej wewnątrz płytkowych \translation{intra-board},
+    choć przy zastosowaniu standardu RS-232 lub RS-485 możliwa
+    jest transmisja na większe odległości.
+    
+    \item \textbf{\isqrc} --- synchroniczna magistrala
+    2-kierunkowa, korzystająca z~2~połączeń --- 
+    zegarowego (SCL) i~danych (SDA). 
+    Wysyłająca dane w trybie \textit{half duplex}, w~konfiguracji
+    \textit{master-slave}.
+    Zaprojektowana do użytku w~krótkich połączeniach, najlepiej 
+    wewnątrz płytkowych \translation{intra-board}\cite{I2C_Bus_Electrical_Specifications}. 
+    Na dłuższych dystansach zachodzi degradacja sygnału 
+    \translation{signal degradation}.
+
+    \item \textbf{1-Wire} --- asynchroniczna magistrala 2-kierunkowa,
+    używająca 1 połaczenia do 2-kierunkowego przesyłu danych w~trybie
+    \textit{half duplex}, w~konfiguracji \textit{master-slave}. 
+    Obsługuje niskie prędkości przesyłu 
+    od 15,4 do \SI{125}{\kilobitpersecond}.
+    W~przeciwieństwie do magistrali \isqrc, przesył danych jest 
+    możliwy na znacznie większe odległości, osiągające nawet 
+    \SI{100}{\meter}\cite{1-Wire_Bus}.
+\end{itemize}
+
+Wiele mikrokontrolerów posiada sprzętową implementację obsługi
+niskopoziomowych protokołów komunikacyjnych. W~przypadku
+mikrokontrolera \textbf{ATmega328p}, zastosowanego w~niniejszej
+pracy, wsparcie sprzętowe obejmuje protokoły \textbf{USART}
+oraz \textbf{\isqrc}, natomiast protokół \textbf{1-Wire}
+wymaga implementacji programowej.
+
+Dostęp do wymienionych protokołów z~poziomu kodu aplikacji
+realizowany jest poprzez warstwę abstrakcji sprzętowej (HAL,
+ang. \textit{Hardware Abstraction Layer}). W~przypadku
+protokołu \isqrc{} biblioteka \texttt{embedded\_hal} definiuje w~tym 
+celu cechę \texttt{I2c}, której konkretną implementację dla 
+mikrokontrolerów z~rodziny AVR dostarcza biblioteka \texttt{avr-hal} 
+poprzez strukturę \texttt{I2c}. Wykorzystanie tej magistrali
+zostanie opisanie w~podrozdziale~\ref{section:i2c_hardware}, 
+a~opis obsługi jej urządzeń w~podrozdziale~\ref{section:devices_programming}
