@@ -8,7 +8,7 @@ atmosferycznego i~natężenia oświetlenia, a~także zagadnienia związane
 z~zasilaniem urządzeń zewnętrznych ze źródeł fotowoltaicznych, 
 w~tym porównanie ogniw litowo-jonowych z~superkondensatorami jako 
 magazynów energii.
-
+q
 \section{Czujniki klimatyczne}
 Współczesny rozwój technologiczny w~połączeniu z~postępującymi
 zamianami klimatu oraz rosnącą automatyzacją procesów 
@@ -16,12 +16,13 @@ przemysłowych i~urządzeń domowych sprawiły, że precyzyjne
 obserwowanie i~dokumentowanie parametrów środowiskowych stało się
 nieodłącznym elementem współczesnej inżynierii.
 
-Głównym zadaniem czujników klimatycznych jest ciągła 
-i~bezobsługowa akwizycja danych dotyczących parametrów atmosfery 
-w~wybranym obszarze. Dane te są kluczowe w~wielu dziedzinach
-życia gospodarczego i~społecznego. W~rolnictwie precyzyjnym
-\translation{smart agriculture} pozwalają na optymalizację 
-nawadniania i~ochrony upraw [TODO: citation needed], 
+Na potrzeby tej pracy czujnikiem klimatycznym określa się urządzenie
+wyposażone w~moduły pomiarowe --- takie jak termometr, higrometr czy 
+barometr --- zajmujące się akwizycją danych
+dotyczących parametrów atmosfery w~wybranym obszarze. Dane te są 
+kluczowe w~wielu dziedzinach życia gospodarczego i~społecznego. 
+W~rolnictwie precyzyjnym \translation{smart agriculture} pozwalają 
+na optymalizację nawadniania i~ochrony upraw [TODO: citation needed], 
 w~aglomeracjach miejskich służą do monitorowania smogu i~poziomu
 zanieczyszczeń powietrza, natomiast w~systemach zarządzania 
 budynkami \translation{Building Management Systems} stanowią 
@@ -30,16 +31,19 @@ i~ogrzewania.
 
 Na rynku konsumenckim dostępna jest szeroka gama urządzeń służących 
 do monitorowania parametrów środowiskowych w~warunkach domowych, 
-określanych potocznie mianem stacji pogodowych. Urządzenia tego typu 
-stanowią połączenie kilku przyrządów pomiarowych —-- termometru, 
-higrometru i~barometru —-- i~najczęściej wyposażone są w funkcję prognozy
-pogody wyświetlanej w formie symboli, opartej na zmianach ciśnienia 
-atmosferycznego. 
-Współczesne stacje cyfrowe działają w~oparciu o~sygnał radiowy, 
-oferują większą precyzję oraz dodatkowe funkcje, takie jak zapisywanie 
-danych historycznych czy jednoczesny odczyt z~kilku czujników zewnętrznych. 
+określanych potocznie mianem stacji pogodowych. 
 Do popularnych producentów tego segmentu należą Oregon Scientific, 
 TFA Dostmann, Netatmo oraz Bresser. 
+Współczesne cyfrowe czujniki klimatyczne wyposażone są w~elektroniczne 
+moduły pomiarowe, oferujące większą precyzję i~większą wygodę odczytu 
+danych w~porównaniu do ich analogowych odpowiedników.
+W celu akwizycji danych klimatycznych z~różnych miejsc, stacje pogodowe
+wyposażone są w~czujniki komunikujące się radiowo --- najczęściej na 
+częstotliwości 433 MHz lub 868 MHz --- ze stacją bazową. 
+Stacja bazowa zajmuje się przetworzeniem danych i~przekazaniem 
+ich użytkownikowi. Często stacja bazowa wyposażona jest we
+własne moduły pomiarowe oraz dodatkowe funkcje, takie jak
+zapisywanie danych historycznych.
 Rozwiązania klasy wyższej, takie jak stacja Netatmo, integrują się 
 z~platformami inteligentnego domu i~umożliwiają monitorowanie dodatkowych 
 parametrów, jak stężenie CO\textsubscript{2} czy poziom hałasu, 
@@ -84,7 +88,7 @@ komunikacją przez dedykowany, jednobitowy protokół szeregowy.
 Wyższą klasę dokładnościową reprezentują moduły szwajcarskiej firmy 
 Sensirion --- seria SHT3x (SHT30, SHT31, SHT35) oraz nowsza seria 
 SHT4x (SHT40, SHT41, SHT45), komunikujące się przez interfejs 
-\isqrc i~oferujące dokładność pomiaru 
+\isqrc{} i~oferujące dokładność pomiaru 
 temperatury na poziomie $\pm0{,}2$\,°C. W~obszarze pomiaru 
 ciśnienia atmosferycznego dominuje oferta firmy Bosch Sensortec --- 
 od popularnego BMP180, przez powszechnie stosowany BMP280, po 
@@ -303,19 +307,20 @@ jest rygorystyczny determinizm czasowy.
 Język Rust reprezentuje nowoczesne podejście do programowania 
 systemowego, łącząc wydajność i~niskopoziomową kontrolę znaną 
 z~języków C/C++ z~nowoczesnymi mechanizmami bezpieczeństwa. 
-W~kontekście systemów wbudowanych, kluczową cechą Rusta jest koncepcja
-zarządzania pamięcią oparta na systemie własności 
+W~kontekście systemów wbudowanych, kluczową cechą języka Rust jest 
+koncepcja zarządzania pamięcią oparta na systemie własności 
 \translation{ownership} oraz cyklach życia obiektów 
 \translation{lifetimes}. Walidacja tych reguł odbywa się na etapie 
 kompilacji \translation{compile-time}, co eliminuje całą klasę 
 błędów związanych z~dostępem do pamięci bez wprowadzania narzutu 
-w~czasie wykonywania programu \translation{zero-cost abstractions} 
-oraz bez użycia mechanizmu \textit{Garbage Collector}.
+w~czasie wykonywania programu oraz bez użycia mechanizmu 
+\textit{Garbage Collector}.
 
 Dodatkowo, ekosystem języka Rust oferuje zaawansowane narzędzia menedżera 
-pakietów \texttt{cargo}, co ułatwia zarządzanie zależnościami oraz 
+pakietów \textbf{cargo}, co ułatwia zarządzanie zależnościami oraz 
 automatyzację testów. Choć próg wejścia~w ten język jest wysoki ze 
-względu na restrykcyjny kompilator, bezpieczeństwo kodu i~odporność 
+względu na restrykcyjny kompilator oraz niestandardowe podejście do 
+zarządzania pamięcią, bezpieczeństwo kodu i~odporność 
 na błędy współbieżności \translation{data races} sprawiają, 
 że staje się on coraz częstszym wyborem w projektowaniu 
 niezawodnych systemów wbudowanych.
@@ -345,8 +350,8 @@ Jak wynika z~powyższego porównania, język Rust stanowi optymalny
 kompromis pomiędzy bezkompromisową wydajnością i~determinizmem 
 cechującym język C, a~nowoczesnymi mechanizmami bezpieczeństwa 
 i~wysokim poziomem abstrakcji. Z~tego względu został on wybrany 
-jako główne narzędzie programistyczne w~realizacji projektu 
-praktycznego.
+jako główne narzędzie programistyczne w~realizacji części praktycznej
+projektu.
 
 \section{Obsługa magistrali}
 Komunikacja z~modułami pomiarowymi może odbywać się 
@@ -399,4 +404,5 @@ celu cechę \texttt{I2c}, której konkretną implementację dla
 mikrokontrolerów z~rodziny AVR dostarcza biblioteka \texttt{avr-hal} 
 poprzez strukturę \texttt{I2c}. Wykorzystanie tej magistrali
 zostanie opisanie w~podrozdziale~\ref{section:i2c_hardware}, 
-a~opis obsługi jej urządzeń w~podrozdziale~\ref{section:devices_programming}
+a~opis obsługi jej urządzeń 
+w~podrozdziale~\ref{section:devices_programming}.
