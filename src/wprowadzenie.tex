@@ -1,4 +1,4 @@
-\chapter{Wprowadzenie do tematyki}
+\chapter{Wprowadzenie}
 Rozdział pierwszy wprowadza w~tematykę pracy, przedstawiając kontekst 
 zastosowania czujników klimatycznych we współczesnej inżynierii oraz 
 uzasadniając dobór komponentów pomiarowych i~energetycznych 
@@ -8,7 +8,7 @@ atmosferycznego i~natężenia oświetlenia, a~także zagadnienia związane
 z~zasilaniem urządzeń zewnętrznych ze źródeł fotowoltaicznych, 
 w~tym porównanie ogniw litowo-jonowych z~superkondensatorami jako 
 magazynów energii.
-q
+
 \section{Czujniki klimatyczne}
 Współczesny rozwój technologiczny w~połączeniu z~postępującymi
 zamianami klimatu oraz rosnącą automatyzacją procesów 
@@ -29,9 +29,9 @@ budynkami \translation{Building Management Systems} stanowią
 podstawę sterowania procesami klimatyzacji, wentylacji 
 i~ogrzewania.
 
-Na rynku konsumenckim dostępna jest szeroka gama urządzeń służących 
-do monitorowania parametrów środowiskowych w~warunkach domowych, 
-określanych potocznie mianem stacji pogodowych. 
+Na rynku konsumenckim dostępna jest szeroka gama czujników klimatycznych
+przeznaczonych do użytku w~warunkach domowych, określanych mianem stacji
+pogodowych. 
 Do popularnych producentów tego segmentu należą Oregon Scientific, 
 TFA Dostmann, Netatmo oraz Bresser. 
 Współczesne cyfrowe czujniki klimatyczne wyposażone są w~elektroniczne 
@@ -41,9 +41,8 @@ W celu akwizycji danych klimatycznych z~różnych miejsc, stacje pogodowe
 wyposażone są w~czujniki komunikujące się radiowo --- najczęściej na 
 częstotliwości 433 MHz lub 868 MHz --- ze stacją bazową. 
 Stacja bazowa zajmuje się przetworzeniem danych i~przekazaniem 
-ich użytkownikowi. Często stacja bazowa wyposażona jest we
-własne moduły pomiarowe oraz dodatkowe funkcje, takie jak
-zapisywanie danych historycznych.
+ich użytkownikowi. Często wyposażona jest we własne moduły pomiarowe 
+oraz dodatkowe funkcje, na przykład zapisywanie danych historycznych.
 Rozwiązania klasy wyższej, takie jak stacja Netatmo, integrują się 
 z~platformami inteligentnego domu i~umożliwiają monitorowanie dodatkowych 
 parametrów, jak stężenie CO\textsubscript{2} czy poziom hałasu, 
@@ -76,19 +75,16 @@ algorytmy linearyzacji charakterystyk sensorów oraz cyfrowe filtry
 szumów, co umożliwia wygodny odczyt danych bezpośrednio przez 
 mikrokontroler.
 
-
-Na rynku dostępnych jest szereg modułów realizujących pomiary 
+Na rynku dostępny jest szereg modułów realizujących pomiary 
 klimatyczne, różniących się zarówno mierzonymi wielkościami 
 fizycznymi, jak i~osiąganą dokładnością, zakresem pomiarowym 
 oraz stopniem integracji. Wśród popularnych modułów pomiarowych 
 temperatury i~wilgotności wyróżnić można przede wszystkim rodzinę 
 DHT (DHT11, DHT22) firmy AOSONG, charakteryzującą się niskim kosztem 
-i~szeroką dostępnością, lecz ograniczoną dokładnością oraz 
-komunikacją przez dedykowany, jednobitowy protokół szeregowy. 
+i~szeroką dostępnością, lecz ograniczoną dokładnością. 
 Wyższą klasę dokładnościową reprezentują moduły szwajcarskiej firmy 
 Sensirion --- seria SHT3x (SHT30, SHT31, SHT35) oraz nowsza seria 
-SHT4x (SHT40, SHT41, SHT45), komunikujące się przez interfejs 
-\isqrc{} i~oferujące dokładność pomiaru 
+SHT4x (SHT40, SHT41, SHT45) oferujące dokładność pomiaru 
 temperatury na poziomie $\pm0{,}2$\,°C. W~obszarze pomiaru 
 ciśnienia atmosferycznego dominuje oferta firmy Bosch Sensortec --- 
 od popularnego BMP180, przez powszechnie stosowany BMP280, po 
@@ -98,9 +94,45 @@ BME688), łączące pomiar ciśnienia, temperatury i~wilgotności
 w~jednej obudowie, przy czym moduły BME680 i~BME688 wyposażone są 
 dodatkowo w~czujnik gazów lotnych (VOC). Do pomiaru natężenia 
 oświetlenia w~zakresie widzialnym najczęściej stosuje się moduły 
-BH1750 firmy ROHM oraz VEML7700 firmy Vishay, oba komunikujące 
-się przez interfejs \isqrc.
+BH1750 firmy ROHM oraz VEML7700 firmy Vishay.
 
+\section{Komunikacja z modułami}
+Komunikacja z~modułami pomiarowymi może odbywać się 
+za pośrednictwem wielu protokołów. Głównymi z nich
+są: 
+\begin{itemize}
+    \item \textbf{USART} --- asynchroniczna lub synchroniczna magistrala
+    2-kierunkowa, korzystająca z~2~połączeń do transmisji danych ---
+    nadawczego (TX) i~odbiorczego (RX). W~trybie synchronicznym
+    wykorzystywane jest dodatkowe połączenie zegarowe (XCK).
+    Przesyła dane w~trybie \textit{full duplex}, w~konfiguracji
+    \textit{peer-to-peer}.
+    Zaprojektowana do użytku w~krótkich połączeniach,
+    najlepiej wewnątrz płytkowych \translation{intra-board},
+    choć przy zastosowaniu standardu RS-232 lub RS-485 możliwa
+    jest transmisja na większe odległości.
+    
+    \item \textbf{\isqrc} --- synchroniczna magistrala
+    2-kierunkowa, korzystająca z~2~połączeń --- 
+    zegarowego (SCL) i~danych (SDA). 
+    Wysyłająca dane w trybie \textit{half duplex}, w~konfiguracji
+    \textit{master-slave}.
+    Zaprojektowana do użytku w~krótkich połączeniach, najlepiej 
+    wewnątrz płytkowych \translation{intra-board}\cite{I2C_Bus_Electrical_Specifications}. 
+    Na dłuższych dystansach zachodzi degradacja sygnału 
+    \translation{signal degradation}.
+
+    \item \textbf{1-Wire} --- asynchroniczna magistrala 2-kierunkowa,
+    używająca 1 połaczenia do 2-kierunkowego przesyłu danych w~trybie
+    \textit{half duplex}, w~konfiguracji \textit{master-slave}. 
+    Obsługuje niskie prędkości przesyłu 
+    od 15,4 do \SI{125}{\kilobitpersecond}.
+    W~przeciwieństwie do magistrali \isqrc, przesył danych jest 
+    możliwy na znacznie większe odległości, osiągające nawet 
+    \SI{100}{\meter}\cite{1-Wire_Bus}.
+\end{itemize}
+
+\section{Zestawienie wybranych modułów}
 Zestawienie wybranych, reprezentatywnych modułów dostępnych na rynku 
 wraz z~ich podstawowymi parametrami przedstawiono 
 w~tabeli~\ref{tab:czujniki_rynek}.
@@ -158,11 +190,9 @@ dostarcza danych o~ciśnieniu atmosferycznym, natomiast VEML7700
 rozszerza zestaw pomiarowy o~natężenie oświetlenia widzialnego. 
 Implementacja warstwy komunikacyjnej dla każdego z~modułów została 
 wykonana samodzielnie na podstawie specyfikacji protokołu 
-\isqrc oraz rejestrów opisanych 
-w~dokumentacji producenta, co szczegółowo omówiono 
-w~rozdziale~\ref{section:devices_programming}.
+\isqrc{} oraz rejestrów opisanych w~dokumentacji producenta.
 
-\section{Zasilanie czujników}
+\section{Zasilanie czujników klimatycznych}
 Sposób zasilania czujników klimatycznych jest uzależniony od miejsca 
 ich docelowego zastosowania. W~przypadku montażu wewnętrznego 
 możliwe jest wykorzystanie sieciowego zasilacza impulsowego 
@@ -170,10 +200,9 @@ o~napięciu wyjściowym dobranym do wymagań układu, jak również
 jednorazowych baterii alkalicznych. W~przypadku montażu zewnętrznego 
 doprowadzenie zasilania przewodem bywa często niepraktyczne lub 
 niemożliwe. Alternatywę stanowią baterie jednorazowe, jednak wymagają 
-one okresowej wymiany. Rozwiązaniem przyjętym w~niniejszym projekcie 
-jest zasilanie z~paneli fotowoltaicznych.
-
-Zastosowanie ogniw fotowoltaicznych wymaga jednak uzupełnienia układu 
+one okresowej wymiany.
+Rozwiązaniem wymagającym najmniej integracji jest zastosowanie ogniw 
+fotowoltaicznych. Podejście to jednak wymaga uzupełnienia układu 
 o~magazyn energii umożliwiający podtrzymanie pracy czujnika w~okresach 
 braku nasłonecznienia. Powszechnie stosowanym rozwiązaniem są ogniwa 
 litowo-jonowe, których wybór uzasadnia malejący koszt, szeroka 
@@ -190,8 +219,7 @@ na wahania temperatury \cite{Comparing_Supercapacitors_to_Lithium-Ion_Batteries}
 oraz nie wymagają ograniczenia głębokości 
 rozładowania. Układ ładowania sprowadza się w~ich przypadku wyłącznie 
 do zabezpieczenia przed przekroczeniem maksymalnego napięcia na 
-okładkach, co omówiono w~podrozdziale~\ref{section:supercapacitor_charging}.  
-Cechy te czynią superkondensatory rozwiązaniem szczególnie 
+okładkach. Cechy te czynią superkondensatory rozwiązaniem szczególnie 
 odpowiednim dla zewnętrznych czujników zasilanych fotowoltaicznie.
 Istotną wadą superkondensatorów pozostaje jednak znacznie mniejsza 
 gęstość energetyczna w~porównaniu z~ogniwami litowo-jonowymi, co 
@@ -242,10 +270,6 @@ Do najpopularniejszych rodzin mikrokontrolerów należą:
     obliczeniową i bogaty zestaw peryferiów, powszechnie stosowane 
     w~rozwiązaniach profesjonalnych.
 \end{itemize}
-
-Ze względu na niski stopień skomplikowania projektu wybrany został 
-procesor \textbf{ATmega328p} firmy Atmel, którego dokładniejszy 
-opis przedstawiono w podrozdziale~\ref{section:atmega328p}.
 
 \section{Języki programowania}
 Wybór odpowiedniego języka programowania ma kluczowe znaczenie dla 
@@ -353,42 +377,12 @@ i~wysokim poziomem abstrakcji. Z~tego względu został on wybrany
 jako główne narzędzie programistyczne w~realizacji części praktycznej
 projektu.
 
-\section{Obsługa magistrali}
-Komunikacja z~modułami pomiarowymi może odbywać się 
-za pośrednictwem wielu protokołów. Głównymi z nich
-są: 
-\begin{itemize}
-    \item \textbf{USART} --- asynchroniczna lub synchroniczna magistrala
-    2-kierunkowa, korzystająca z~2~połączeń do transmisji danych ---
-    nadawczego (TX) i~odbiorczego (RX). W~trybie synchronicznym
-    wykorzystywane jest dodatkowe połączenie zegarowe (XCK).
-    Przesyła dane w~trybie \textit{full duplex}, w~konfiguracji
-    \textit{peer-to-peer}.
-    Zaprojektowana do użytku w~krótkich połączeniach,
-    najlepiej wewnątrz płytkowych \translation{intra-board},
-    choć przy zastosowaniu standardu RS-232 lub RS-485 możliwa
-    jest transmisja na większe odległości.
-    
-    \item \textbf{\isqrc} --- synchroniczna magistrala
-    2-kierunkowa, korzystająca z~2~połączeń --- 
-    zegarowego (SCL) i~danych (SDA). 
-    Wysyłająca dane w trybie \textit{half duplex}, w~konfiguracji
-    \textit{master-slave}.
-    Zaprojektowana do użytku w~krótkich połączeniach, najlepiej 
-    wewnątrz płytkowych \translation{intra-board}\cite{I2C_Bus_Electrical_Specifications}. 
-    Na dłuższych dystansach zachodzi degradacja sygnału 
-    \translation{signal degradation}.
+\chapter{Wybrane rozwiązania projektowe}
 
-    \item \textbf{1-Wire} --- asynchroniczna magistrala 2-kierunkowa,
-    używająca 1 połaczenia do 2-kierunkowego przesyłu danych w~trybie
-    \textit{half duplex}, w~konfiguracji \textit{master-slave}. 
-    Obsługuje niskie prędkości przesyłu 
-    od 15,4 do \SI{125}{\kilobitpersecond}.
-    W~przeciwieństwie do magistrali \isqrc, przesył danych jest 
-    możliwy na znacznie większe odległości, osiągające nawet 
-    \SI{100}{\meter}\cite{1-Wire_Bus}.
-\end{itemize}
-
+\section{Moduły pomiarowe}
+\section{Zasilanie}
+\section{Mikrokontroler}
+\section{Oprogramowanie}
 Wiele mikrokontrolerów posiada sprzętową implementację obsługi
 niskopoziomowych protokołów komunikacyjnych. W~przypadku
 mikrokontrolera \textbf{ATmega328p}, zastosowanego w~niniejszej
