@@ -29,9 +29,11 @@ budynkami \translation{Building Management Systems} stanowią
 podstawę sterowania procesami klimatyzacji, wentylacji 
 i~ogrzewania.
 
-Na rynku konsumenckim dostępna jest szeroka gama czujników klimatycznych
-przeznaczonych do użytku w~warunkach domowych, określanych mianem stacji
-pogodowych. 
+Na rynku konsumenckim dostępna jest szeroka gama stacji pogodowych
+będących zbiorem czujników klimatycznych, z~których dane przesyłane
+są do stacji bazowych. Często stacje pogodowe do użytku domowego
+składają się z~samej stacji bazowej, będącej jednocześnie 
+czujnikiem klimatycznym.
 Do popularnych producentów tego segmentu należą Oregon Scientific, 
 TFA Dostmann, Netatmo oraz Bresser. 
 Współczesne cyfrowe czujniki klimatyczne wyposażone są w~elektroniczne 
@@ -63,10 +65,8 @@ opisanego w~niniejszej pracy.
 \section{Moduły pomiarowe}
 Do podstawowych wielkości fizycznych rejestrowanych przez czujniki 
 klimatyczne zalicza się przede wszystkim temperaturę, wilgotność 
-względną oraz ciśnienie atmosferyczne. Do pomiaru tych wielkości 
-coraz rzadziej wykorzystuje się bezpośrednio połączone z~układem 
-czujniki analogowe --- są one wypierane przez moduły integrujące 
-elementy pomiarowe, dedykowane przetworniki analogowo-cyfrowe 
+względną oraz ciśnienie atmosferyczne. Obecne moduły cyfrowe 
+integrują elementy pomiarowe, dedykowane przetworniki analogowo-cyfrowe 
 (ADC, ang. \textit{analog-to-digital converter}) oraz fabryczne 
 obwody kalibracyjne w~jednej obudowie. Rozwiązanie takie pozwala 
 wyeliminować problem zakłóceń elektromagnetycznych indukowanych 
@@ -177,21 +177,7 @@ E\textsubscript{v}~-- natężenie oświetlenia; $^*$~moduły zastosowane
 w~niniejszej pracy.
 \end{table}
 
-Do realizacji systemu opisanego w~niniejszej pracy wybrano moduły 
-AHT20, BMP280 oraz VEML7700. Kryterium doboru była dostępność 
-szczegółowej dokumentacji technicznej w~postaci kart katalogowych 
-producenta, umożliwiającej samodzielną implementację sterowników 
-programowych. Wszystkie trzy moduły komunikują się przez interfejs 
-\isqrc, co upraszcza schemat połączeń 
-elektrycznych --- wymagają one jedynie wspólnej magistrali 
-dwuprzewodowej. Funkcjonalnie moduły te wzajemnie się uzupełniają: 
-AHT20 realizuje pomiar temperatury i~wilgotności względnej, BMP280 
-dostarcza danych o~ciśnieniu atmosferycznym, natomiast VEML7700 
-rozszerza zestaw pomiarowy o~natężenie oświetlenia widzialnego. 
-Implementacja warstwy komunikacyjnej dla każdego z~modułów została 
-wykonana samodzielnie na podstawie specyfikacji protokołu 
-\isqrc{} oraz rejestrów opisanych w~dokumentacji producenta.
-
+ 
 \section{Zasilanie czujników klimatycznych}
 Sposób zasilania czujników klimatycznych jest uzależniony od miejsca 
 ich docelowego zastosowania. W~przypadku montażu wewnętrznego 
@@ -243,7 +229,6 @@ i~motoryzacji~\cite{Programming_Embedded_Systems}.
 \section{Charakterystyka układów sterujących}
 Kluczowym elementem decyzyjnym systemu wbudowanego jest układ scalony 
 o~wysokim stopniu integracji --- mikrokontroler lub mikroprocesor. 
-
 Mikroprocesor (MPU) integruje jednostkę centralną (CPU) oraz rejestry 
 danych, jednak do poprawnej pracy wymaga zewnętrznych komponentów, 
 takich jak pamięć operacyjna (RAM), pamięć nieulotna oraz kontrolery 
@@ -350,6 +335,7 @@ na błędy współbieżności \translation{data races} sprawiają,
 niezawodnych systemów wbudowanych.
 
 \subsection{Podsumowanie i porównanie cech języków}
+\label{section:lang_compare}
 W~celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
 w~tabeli \ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
 omawianych języków programowania. 
@@ -370,33 +356,68 @@ Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \hline
 \end{tabular}
 \end{table}
 
-Jak wynika z~powyższego porównania, język Rust stanowi optymalny 
+\chapter{Wybrane rozwiązania projektowe}
+Zadaniem tego rozdziału jest opisanie rozwiązań wybranych do realizacji
+części praktycznej licencjatu.
+
+\section{Moduły pomiarowe}
+Wybrane moduły pomiarowe obejmują wcześniej wspomniane AHT20, MBP280 
+oraz VEML7700. Funkcjonalnie moduły te wzajemnie się uzupełniają: 
+AHT20 realizuje pomiar temperatury i~wilgotności względnej, BMP280 
+dostarcza danych o~ciśnieniu atmosferycznym, natomiast VEML7700 
+rozszerza zestaw pomiarowy o~natężenie oświetlenia widzialnego.
+Wszystkie komunikują się protokołem \isqrc{} co ułatwia zaprojektowanie
+połączeń z~mikrokontrolerem --- wymagają one jedynie wspólnej magistrali 
+dwuprzewodowej.
+Dodatkowym kryterium doboru była dostępność 
+szczegółowej dokumentacji technicznej w~postaci kart katalogowych 
+producenta, umożliwiającej samodzielną implementację sterowników 
+programowych.
+Projekt został wyposażony również w~licznik Geigera-Müllera w~celu
+ostrzegania przed zwiększonym poziomem promieniowania.
+
+\section{Zasilanie}
+Jako jedyne źródło zasilania dla czujników klimatycznych wybrano 
+panele fotowoltaiczne. W~celu zapewnienia nieprzerwanej pracy 
+czujniki zostały wyposażone w~superkondensatory i~układ 
+zabezpieczający je przed przeładowaniem.
+
+\section{Mikrokontroler}
+Ze względu na niski stopień skomplikowania projektu wybrany został 
+procesor \textbf{ATmega328p} firmy Atmel, oparty o 8-bitowy procesor 
+z~architekturą AVR firmy Atmel, posiadający 32KB wbudowanej pamięci 
+typu flash\cite{ATmega328p}. 
+Najważniejszymi jego cechami, w~kontekście tego projektu, są niski 
+pobór mocy, możliwość uśpienia oraz wbudowane konwertery
+analogowo-cyfrowe\cite{ATmega328p}.
+Posiada on również sprzętowe wsparcie dla protokołu \isqrc{} oraz
+wbudowane 3 liczniki \translation{Timer / Counter}.
+
+\section{Oprogramowanie}
+Z~porównania języków programowania przedstawionego 
+w~podrozdziale \ref{section:lang_compare} wynika,
+że język Rust stanowi optymalny 
 kompromis pomiędzy bezkompromisową wydajnością i~determinizmem 
-cechującym język C, a~nowoczesnymi mechanizmami bezpieczeństwa 
-i~wysokim poziomem abstrakcji. Z~tego względu został on wybrany 
+cechującym język~C, a~nowoczesnymi mechanizmami bezpieczeństwa 
+i~wysokim poziomem abstrakcji. Z~tego względu został wybrany 
 jako główne narzędzie programistyczne w~realizacji części praktycznej
 projektu.
 
-\chapter{Wybrane rozwiązania projektowe}
 
-\section{Moduły pomiarowe}
-\section{Zasilanie}
-\section{Mikrokontroler}
-\section{Oprogramowanie}
-Wiele mikrokontrolerów posiada sprzętową implementację obsługi
-niskopoziomowych protokołów komunikacyjnych. W~przypadku
-mikrokontrolera \textbf{ATmega328p}, zastosowanego w~niniejszej
-pracy, wsparcie sprzętowe obejmuje protokoły \textbf{USART}
-oraz \textbf{\isqrc}, natomiast protokół \textbf{1-Wire}
-wymaga implementacji programowej.
+% Wiele mikrokontrolerów posiada sprzętową implementację obsługi
+% niskopoziomowych protokołów komunikacyjnych. W~przypadku
+% mikrokontrolera \textbf{ATmega328p}, zastosowanego w~niniejszej
+% pracy, wsparcie sprzętowe obejmuje protokoły \textbf{USART}
+% oraz \textbf{\isqrc}, natomiast protokół \textbf{1-Wire}
+% wymaga implementacji programowej.
 
-Dostęp do wymienionych protokołów z~poziomu kodu aplikacji
-realizowany jest poprzez warstwę abstrakcji sprzętowej (HAL,
-ang. \textit{Hardware Abstraction Layer}). W~przypadku
-protokołu \isqrc{} biblioteka \texttt{embedded\_hal} definiuje w~tym 
-celu cechę \texttt{I2c}, której konkretną implementację dla 
-mikrokontrolerów z~rodziny AVR dostarcza biblioteka \texttt{avr-hal} 
-poprzez strukturę \texttt{I2c}. Wykorzystanie tej magistrali
-zostanie opisanie w~podrozdziale~\ref{section:i2c_hardware}, 
-a~opis obsługi jej urządzeń 
-w~podrozdziale~\ref{section:devices_programming}.
+% Dostęp do wymienionych protokołów z~poziomu kodu aplikacji
+% realizowany jest poprzez warstwę abstrakcji sprzętowej (HAL,
+% ang. \textit{Hardware Abstraction Layer}). W~przypadku
+% protokołu \isqrc{} biblioteka \texttt{embedded\_hal} definiuje w~tym 
+% celu cechę \texttt{I2c}, której konkretną implementację dla 
+% mikrokontrolerów z~rodziny AVR dostarcza biblioteka \texttt{avr-hal} 
+% poprzez strukturę \texttt{I2c}. Wykorzystanie tej magistrali
+% zostanie opisanie w~podrozdziale~\ref{section:i2c_hardware}, 
+% a~opis obsługi jej urządzeń 
+% w~podrozdziale~\ref{section:devices_programming}.
