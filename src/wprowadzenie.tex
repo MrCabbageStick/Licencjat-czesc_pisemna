@@ -148,7 +148,7 @@ w~tabeli~\ref{tab:czujniki_rynek}.
 \hline
 DHT22 (AM2302)  & T, RH & 1-Wire & niski koszt \\
 \hline
-AHT20$^*$       & T, RH & I\textsuperscript{2}C & -- \\
+AHT20       & T, RH & I\textsuperscript{2}C & -- \\
 \hline
 SHT31           & T, RH & I\textsuperscript{2}C & wysoka stabilność \\
 \hline
@@ -158,7 +158,7 @@ DS18B20         & T & 1-Wire & wodo\-odporny wariant \\
 \hline
 BMP180          & T, p & I\textsuperscript{2}C & przestarzały \\
 \hline
-BMP280$^*$      & T, p & I\textsuperscript{2}C/SPI & niski pobór mocy \\
+BMP280      & T, p & I\textsuperscript{2}C/SPI & niski pobór mocy \\
 \hline
 BME280          & T, RH, p & I\textsuperscript{2}C/SPI & 3 wielkości \\
 \hline
@@ -166,15 +166,14 @@ BME688          & T, RH, p, VOC & I\textsuperscript{2}C/SPI & detekcja gazów \\
 \hline
 BH1750          & E\textsubscript{v} & I\textsuperscript{2}C & do 65\,535\,lx \\
 \hline
-VEML7700$^*$    & E\textsubscript{v} & I\textsuperscript{2}C & do 120\,000\,lx \\
+VEML7700    & E\textsubscript{v} & I\textsuperscript{2}C & do 120\,000\,lx \\
 \hline
 \end{tabular}
 \medskip
 
 \raggedright\footnotesize
 T~-- temperatura, RH~-- wilgotność względna, p~-- ciśnienie atmosferyczne, 
-E\textsubscript{v}~-- natężenie oświetlenia; $^*$~moduły zastosowane 
-w~niniejszej pracy.
+E\textsubscript{v}~-- natężenie oświetlenia.
 \end{table}
 
  
@@ -187,7 +186,7 @@ jednorazowych baterii alkalicznych. W~przypadku montażu zewnętrznego
 doprowadzenie zasilania przewodem bywa często niepraktyczne lub 
 niemożliwe. Alternatywę stanowią baterie jednorazowe, jednak wymagają 
 one okresowej wymiany.
-Rozwiązaniem wymagającym najmniej integracji jest zastosowanie ogniw 
+Rozwiązaniem wymagającym najmniej ingerencji jest zastosowanie ogniw 
 fotowoltaicznych. Podejście to jednak wymaga uzupełnienia układu 
 o~magazyn energii umożliwiający podtrzymanie pracy czujnika w~okresach 
 braku nasłonecznienia. Powszechnie stosowanym rozwiązaniem są ogniwa 
@@ -289,7 +288,7 @@ Język C++ wprowadza do świata systemów wbudowanych paradygmat
 programowania obiektowego (OOP) oraz mechanizmy abstrakcji, takie 
 jak szablony \translation{templates} czy polimorfizm. 
 Pozwala to na lepszą strukturyzację i~modularność kodu, co jest 
-szczególnie istotne w~złożonych projektach. 
+szczególnie istotne w~złożonych projektach~\cite{cppreference-cpp}. 
 
 W kontekście mikrokontrolerów stosuje się zazwyczaj ograniczony 
 podzbiór nowoczesnego języka C++~\cite{AUTOSAR_CPP14_2017}. Najczęściej rezygnuje się 
@@ -339,11 +338,11 @@ niezawodnych systemów wbudowanych~\cite{TheRustProgrammingLanguage}.
 \label{section:lang_compare}
 W~celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
 w~tabeli~\ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
-omawianych języków programowania. [TODO: Zmień tabelkę]
+omawianych języków programowania.
 
 \begin{table}[h!]
 \centering
-\caption{Porównanie języków programowania w systemach wbudowanych.}
+\caption{Porównanie języków programowania w systemach wbudowanych}
 \label{tab:porownanie_jezykow}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lcccc}
@@ -352,7 +351,7 @@ omawianych języków programowania. [TODO: Zmień tabelkę]
 Wydajność obliczeniowa & Bardzo wysoka & Bardzo wysoka & Niska & Bardzo wysoka \\
 Zarządzanie pamięcią & Ręczne & Ręczne / Automatyczne & Garbage Collector & Statyczne (Kompilator) \\
 Bezpieczeństwo pamięci & Brak & Ograniczone & Wysokie & Całkowite (Safe Rust) \\
-Poziom abstrakcji & Niski & Średni/Wysoki & Bardzo wysoki & Wysoki \\
+Poziom abstrakcji & Niski & Średni / Wysoki & Bardzo wysoki & Wysoki \\
 Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \bottomrule
 \end{tabular}
 }
