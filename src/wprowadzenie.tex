@@ -361,6 +361,28 @@ Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \bottomrule
 Zadaniem tego rozdziału jest opisanie rozwiązań wybranych do realizacji
 części praktycznej licencjatu.
 
+\section{Założenia projektowe}
+Projekt od początku powstawał z myślą zaprojektowania czujników klimatycznych 
+do zastosowań zewnętrznych. Takie podejście podyktowało pewne założenia,
+które gotowy projekt musi spełnić. Głównymi z nich są:
+\begin{itemize}
+    \item \textbf{Komunikacja radiowa} --- czujnik nie powinien 
+    wymagać przewodowego połączenia ze stacją bazową. Najlepszym rozwiązaniem
+    tego problemu było zastosowanie krótkodystansowej komunikacji radiowej.
+    \item \textbf{Zastosowanie paneli fotowoltaicznych} --- czujnik powinien
+    posiadać własne źródło zasilania, aby jak najbardziej zredukować czas
+    potrzebny na konserwację czujnika.
+    \item \textbf{Zastosowanie superkondensatorów} --- czujnik powinien być 
+    w~stanie dokonywać pomiarów nawet w~czasie braku dostępu do energii 
+    pochodzącej ze źródła zasilania. Wybór superkondensatorów został 
+    uzasadniony w podrozdziale \ref{}.
+    \item \textbf{Niski pobór mocy} --- czujnik powinien potrzebować niewielkich
+    ilości energii do pracy, aby przedłużyć czas operowania na energii 
+    zmagazynowanej w~superkondensatorach i~pozwolić im na szybsze ładowanie
+    energią z paneli fotowoltaicznych.
+\end{itemize} 
+
+
 \section{Moduły pomiarowe}
 Wybrane moduły pomiarowe obejmują wcześniej wspomniane AHT20, MBP280 
 oraz VEML7700. Funkcjonalnie moduły te wzajemnie się uzupełniają: 
@@ -379,7 +401,7 @@ ostrzegania przed zwiększonym poziomem promieniowania.
 
 \section{Zasilanie}
 Jako jedyne źródło zasilania dla czujników klimatycznych wybrano 
-panele fotowoltaiczne. W~celu zapewnienia nieprzerwanej pracy 
+panele fotowoltaiczne, a~w~celu zapewnienia nieprzerwanej pracy 
 czujniki zostały wyposażone w~superkondensatory i~układ 
 zabezpieczający je przed przeładowaniem.
 
