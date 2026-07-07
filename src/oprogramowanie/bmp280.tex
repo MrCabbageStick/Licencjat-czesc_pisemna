@@ -1,8 +1,8 @@
-\subsection{Moduł BMP280}
+\section{Moduł BMP280}
 Moduł BMP280 jest obsługiwany przez strukturę \texttt{Bmp280},
 pokazaną na listingu~\ref{lst:bmp280_struct}. Zawiera ona pole
-adresu urządzenia na magistrali \isqrc, pole przechowujące dane
-kompensacyjne pomiaru oraz parametr typu \texttt{CONFIG} zawarty
+adresu urządzenia magistrali \isqrc, pole przechowujące dane
+kompensacyjne pomiarów oraz parametr typu \texttt{CONFIG} zawarty
 w~polu \texttt{PhantomData} o~zerowym rozmiarze w~pamięci.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
@@ -16,17 +16,19 @@ pub struct Bmp280<CONFIG>{
 }
 \end{lstlisting}
 
-Dane kompensacyjne zapisywane są do struktury
-\texttt{Bmp280Compensations}, składającej się z~dwunastu
-szesnastobitowych pól przechowujących wartości kompensacyjne.
-Są one wykorzystywane przy przeliczaniu surowych danych odczytanych
-z~modułu na temperaturę w~stopniach Celsjusza oraz ciśnienie
-w~paskalach. Implementacja struktury udostępnia funkcję powiązaną
-\texttt{read\_from\_i2c}, odczytującą 24~bajty z~pamięci modułu
-BMP280 i~przypisującą je do poszczególnych pól struktury.
-Implementacja tej funkcji przedstawiona jest na
-listingu~\ref{lst:bmp280compensations_read}, a~nazwy pól struktury
-przyjęto zgodnie z~notą katalogową~\cite{bmp280_datasheet}.
+\subsection*{Dane kompensacyjne}
+Do poprawnej interpretacji danych modułu BMP280 niezbędne są dane kompensacyjne
+zapisane przez producenta w~pamięci samego modułu.
+Składają sie one z~dwunastu liczb szesnastobitowych (dwie z~nich traktowane są
+jako liczby ze znakiem) zapisanych w formacie \textit{little endian}.
+
+Przechowaniem ich po stronie programu zajmuje się struktura 
+\texttt{Bmp280Compensations}.
+Została ona opatrzona metodą pozwalającą na ich odczyt, przedstawioną na
+listingu~\ref{lst:bmp280compensations_read}.
+Metoda odczytuje 24~bajty z~pamięci modułu BMP280 i~przypisuje je do 
+poszczególnych pól struktury. Nazwy pól struktury przyjęto zgodnie z~nazwami
+prezentowanymi w~nocie katalogowej~\cite{bmp280_datasheet}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Odczyt danych kompensacyjnych dla modułu BMP280},
@@ -55,6 +57,7 @@ pub fn read_from_i2c(address: u8, i2c: &mut I2c)
 }
 \end{lstlisting}
 
+\subsection*{Konfiguracja}
 Konfiguracja modułu BMP280 odbywa się poprzez zapis 8-bitowych
 wartości do rejestrów \texttt{CTRL\_MEAS} i~\texttt{CONFIG}. Wartości
 te pozyskiwane są z~typu implementującego cechę \texttt{Config},
@@ -113,8 +116,8 @@ Przykładową implementację cechy \texttt{Config} oraz cech
 odpowiedzialnych za poszczególne wartości bitowe przedstawiono
 na listingu~\ref{lst:bmp280_config_examples}. Definicje pomocniczych
 cech \texttt{Oversampling}, \texttt{PowerMode}, \texttt{Standby}
-i~\texttt{IIRConstant} zostały pominięte, ponieważ są już widoczne
-na listingu~\ref{lst:bmp280_config}.
+i~\texttt{IIRConstant} zostały pominięte, ponieważ zawierają się 
+w~listingu~\ref{lst:bmp280_config}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Przykładowa implementacja cech konfiguracyjnych modułu BMP280},

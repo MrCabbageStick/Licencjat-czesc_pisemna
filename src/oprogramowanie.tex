@@ -1,45 +1,12 @@
 \chapter{Oprogramowanie}
+Rozdział ten ma za zadanie opisać program utworzony na potrzeby
+tego projektu.
 
-\section{Język Rust w programowaniu mikrokontrolerów}
-
-
-\section{Narzędzia i biblioteki}
-
-
-\section{Obsługa elementów pomiarowych}
-\label{section:devices_programming}
-W celu ograniczenia wykorzystania zasobów pamięciowych mikrokontrolera znaczna część konfiguracji urządzeń pomiarowych realizowana jest na etapie kompilacji. Rozbudowany system typów \translation{type system} języka Rust umożliwia zwięzłe i czytelne wyrażenie konfiguracji z wykorzystaniem typów generycznych \translation{generic types}, cech \translation{traits} oraz stałych czasu kompilacji \translation{const generics}.
+\section{Narzędzia i biblioteki nieautorskie}
 
 \input{src/oprogramowanie/aht20.tex}
 \input{src/oprogramowanie/bmp280.tex}
-
-\subsection{Moduł VEML7700}
-
-
-\subsection{Moduł z licznikiem Geigera-Müllera}
-\label{section:geiger_code}
-Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}. Sprzętowy licznik T1 mikrokontrolera skonfigurowany jest do zliczania impulsów zewnętrznych generowanych przez lampę [AI mówi rurę] Geigera-Müllera. Co sekundę zliczona wartość jest odczytywana i zapisywana do 60-elementowego bufora cyklicznego.
-
-Funkcja \texttt{cpm} zwraca liczbę zliczeń na minutę poprzez ekstrapolację zsumowanych wartości bufora na pełną minutę, nawet w przypadku niepełnego zapełnienia bufora. Takie podejście ma dwie konsekwencje: przy czasie pracy krótszym niż minuta wynik może być obarczony większym błędem, natomiast przy pełnym buforze nagłe skoki wartości są wygładzane przez uśrednianie.
-
-Kod odpowiedzialny za odczyt i reset licznika T1 przedstawiono na listingu~\ref{lst:read_geiger_counter}. W celu zabezpieczenia przed przerwaniem wykonywania kodu zastosowano funkcję \texttt{interrupt::free} z biblioteki \texttt{avr\_device}.
-
-\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt zliczeń licznika T1 mikrokontrolera},
-                   label={lst:read_geiger_counter}]
-fn timer1_read_and_reset(tc1: &TC1) -> u16{
-    avr_device::interrupt::free(|_| unsafe {
-        let val = tc1.tcnt1().read().bits();
-        tc1.tcnt1().write(|w| w.bits(0));
-        val
-    })
-}
-\end{lstlisting}
-
-\section{Komunikacja radiowa}
-\subsection{Serializacja danych}
-W celu ustandaryzowania danych zebranych z~modułów pomiarowych zostają one opakowane 
-w~strukturę \texttt{TypedLabeledReadout}.
-
-\subsection{Zabezpieczenie danych}
-[Nie zaimplementowane]
-\subsection{Transmisja danych}
+\input{src/oprogramowanie/veml7700.tex}
+\input{src/oprogramowanie/geiger.tex}
+\input{src/oprogramowanie/radio.tex}
+\input{src/oprogramowanie/serializacja.tex}
