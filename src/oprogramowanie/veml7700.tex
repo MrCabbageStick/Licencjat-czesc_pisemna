@@ -1,1 +1,220 @@
 \section{Moduł VEML7700}
+Moduł VEML7700 obsługiwany jest przez strukturę \texttt{Veml7700},
+pokazaną na listingu~\ref{lst:veml7700}. Posiada parametr typu 
+\texttt{CONFIG} zawarty w~polu PhantomData o~zerowym rozmiarze w~pamięci 
+oraz pole \texttt{address} przechowujące adres urządzenia magistrali \isqrc.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Veml7700}},
+    label={lst:veml7700}
+]
+pub struct Veml7700<CONFIG>{
+    address: u8,
+    _config: PhantomData<CONFIG>,
+}
+\end{lstlisting}
+
+\subsection*{Konfiguracja}
+\label{section:veml7700_config}
+Konfiguracja modułu VEML7700 odbywa się poprzez zapis danych do 2
+dwu bajtowych rejestrów o~adresach 0x0 i~0x3.
+Dodatkowo moduł oferuje możliwość wykrycia przekroczenia konkretnych 
+wartości górnych i~dolnych, po którym nastąpi ustawienie odpowiedniego
+bitu w~pamięci modułu. Do ustawienia tych wartości służą odpowiednio 
+dwu bajtowe rejestry o~adresach 0x1 i~0x2.
+
+W~celu przedstawienia konfiguracji została utworzona cecha \texttt{Config}
+oraz cechy pomocnicze przedstawione na~listingu \ref{lst:veml7700_config}.
+Głównym zadaniem tej cechy jest określenie wartości rejestrów 
+bazując na stałych czasu kompilacji \texttt{BITS} dostępnych w~cechach
+pomocniczych.
+
+Wartości dla rejestrów odpowiedzialnych za ustawianie wartości progowych 
+wynoszą 0 i~nie są zależne od cech pomocniczych. Wynika to z~braku 
+potrzeby używania ich w~tym projekcie.
+
+Z~racji wpływu konfiguracji na stałe matematyczne używane przy konwersji
+surowych wartości odczytanych z~modułu, cecha została uzupełniona o~stałe 
+\texttt{LUX\_NUM} i~\texttt{LUX\_DEN} używane w~późniejszych obliczeniach.
+Ich wartości można obliczyć ze wzorów:
+
+\begin{equation}
+    LUX\_DEN = Sensitivity \cdot Scale \cdot T_{refresh},
+    \label{eq:veml7700_lux_den}
+\end{equation}
+\noindent gdzie:
+\begin{itemize}
+    \item $Sensitivity$ --- wartość czułości z~tabeli ,,REFRESH 
+    TIME, IDD, AND SENSITIVITY RELATION'' obecnej w~nocie 
+    katalogowej~\cite{veml7700_datasheet};
+    \item $T_{refresh}$ --- wartość czasu odświeżania z~tabeli 
+    ,,REFRESH TIME, IDD, AND SENSITIVITY RELATION'' obecnej w~nocie 
+    katalogowej~\cite{veml7700_datasheet};
+    \item $Scale$ --- wartość dobrana w~zależności od wymaganej dokładności
+    pomiaru, mająca za zadanie zmniejszyć błąd wynikający z~zastosowania
+    arytmetyki całkowitoliczbowej.
+\end{itemize}
+
+\begin{equation}
+    LUX\_NUM = 10 \cdot Scale,
+    \label{eq:veml7700_lux_num}
+\end{equation}
+\noindent gdzie:
+\begin{itemize}
+    \item $Scale$ --- wartość identyczna do tej, użytej przy obliczaniu
+    \texttt{LUX\_DEN}.
+\end{itemize}
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Cecha \texttt{Config} dla VEML7700},
+    label={lst:veml7700_config}
+]
+pub trait Config{
+    type Sm: AlsSm;
+    type It: AlsIt;
+    type Psm: AlsPsm;
+
+    // Values of registers
+    const BITS_0x00: u16 = Self::Sm::BITS << SM_OFFSET 
+                        | Self::It::BITS << IT_OFFSET;
+    const BITS_0x03: u16 = Self::Psm::BITS << PSM_OFFSET 
+                        | 0b1 << PSM_EN_OFFSET;
+
+    // Registers 0x01 and 0x02 are unused as they code for thresholds
+    const BITS_0x01: u16 = 0;
+    const BITS_0x02: u16 = 0;
+
+    /// Lux calculation numerator
+    const LUX_NUM: u32;
+    /// Lux calculation denominator
+    const LUX_DEN: u32;
+}
+
+/// Sensitivity mode
+pub trait AlsSm{ const BITS: u16; }
+
+/// Integration time
+pub trait AlsIt{ const BITS: u16; }
+
+/// Power saving mode
+pub trait AlsPsm{ const BITS: u16; }
+\end{lstlisting}
+
+Przykładowa konfiguracja, używana na potrzeby tego projektu, jest pokazana na 
+listingu~\ref{lst:veml7700_config_exmaple}. Dane pochodzą z~noty katalogowej
+modułu~\cite{veml7700_datasheet}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Przykładowa konfiguracja dla modułu VEML7700},
+    label={lst:veml7700_config_exmaple}
+]
+pub struct ConfigFastLowPower;
+
+impl Config for ConfigFastLowPower{
+    type It = AlsIt25ms;
+    type Sm = AlsSm_x2;
+    type Psm = AlsPsm1;
+
+    const LUX_NUM: u32 = 10 * 1000;
+    // Sesitivity of 0.042 scaled scaled by 1000
+    // and refresh time of 600ms
+    const LUX_DEN: u32 = 42 * 600;
+}
+
+pub struct AlsIt25ms;
+impl AlsIt for AlsIt25ms{  const BITS: u16 = 0b1100; }
+
+pub struct AlsSm_x2;
+impl AlsSm for AlsSm_x2{   const BITS: u16 = 0b01; }
+
+pub struct AlsPsm1;
+impl AlsPsm for AlsPsm1{ const BITS: u16 = 0b00; }
+\end{lstlisting}
+
+\subsection*{Inicjalizacja}
+Inicjalizacja modułu VEML7700 sprowadza się do wpisania danych
+do 4 rejestrów konfiguracyjnych. W~tym celu implementacja 
+struktury \texttt{Veml7700} posiada stałą czasu kompilacji
+będącą tablicą wartości do jakie powinny przyjąć rejestry.
+Funkcja \texttt{init} iteruje przez te wartości, wpisując 
+je do rejestrów. Pomiędzy każdym zapisem danych występuje
+przerwa co najmniej \SI{10}{\milli\second}. Proces ten został
+przedstawiony na listingu~\ref{lst:veml7700_init}.
+
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Funkcja \texttt{init} struktury \texttt{Veml7700}},
+    label={lst:veml7700_init}
+]
+impl<CONFIG: Config> Veml7700<CONFIG>{
+    const REGISTERS: [u16; 4] = [
+        CONFIG::BITS_0x00,
+        CONFIG::BITS_0x01,
+        CONFIG::BITS_0x02,
+        CONFIG::BITS_0x03,
+    ];
+
+    // [...]
+
+    pub fn init(&self, i2c: &mut I2c) 
+    -> Result<(), arduino_hal::i2c::Error>{
+        for i in 0..Self::REGISTERS.len()
+        {
+            let value = Self::REGISTERS[i];
+            let lsb = (value & 0xFF) as u8;
+            let msb = (value >> 8) as u8;
+
+            i2c.write(self.address, &[i as u8, lsb, msb])?;
+            // Add delay for write
+            Delay::<MHz8>::new().delay_ms(10);
+        }
+
+        Ok(())
+    }
+
+    // [...]
+}
+\end{lstlisting}
+
+\subsection*{Konwersja danych}
+Wzór matematyczny służący do konwersji surowych danych pobranych z~modułu na 
+wartość wyrażoną w~luksach znajduje się w~nocie katalogowej~\cite{veml7700_datasheet}.
+Na potrzeby kodu został on przekształcony na $lux = \frac{raw \cdot LUX\_NUM}{LUX\_DEN}$.
+$LUX\_DEN$ i~$LUX\_NUM$ zostały opisane w~podrozdziale~\ref{section:veml7700_config}.
+Implementacja tego wzoru widoczna jest na listingu~\ref{lst:veml7700_conversion}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Konwersja surowych danych modułu VEML7700 na wartośc wyrazoną w~luksach},
+    label={lst:veml7700_conversion}
+]
+fn raw_to_lux(raw: u16) -> u32{
+    (raw as u32 * Self::LUX_NUM) / Self::LUX_DEN
+}
+\end{lstlisting}
+
+\subsection*{Odczyt danych}
+Odczyt danych z~modułu polega na odczytaniu wartości rejestru 0x5,
+wewnątrz którego zapisana jest 16--bitowa liczba bez znaku.
+Liczba ta następnie poddawana jest konwersji.
+Metoda realizująca ten proces ten został pokazany na 
+listingu~\ref{lst:veml7700_read}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Odczyt danych z~modułu VEML7700},
+    label={lst:veml7700_read}
+]
+pub fn read(&self, i2c: &mut I2c) 
+-> Result<u32, arduino_hal::i2c::Error>{
+    let mut buffer = [0u8; 2];
+
+    i2c.write_read(
+        self.address, 
+        &[VALUE_REGISTER_INDEX], 
+        &mut buffer
+    )?;
+
+    let raw = u16::from_le_bytes([buffer[0], buffer[1]]);
+
+    Ok(Self::raw_to_lux(raw))
+}
+\end{lstlisting}
