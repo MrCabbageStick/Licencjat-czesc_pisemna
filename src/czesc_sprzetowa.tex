@@ -76,108 +76,161 @@ zwykłej diody, spadku napięcia.
 
 
 \section{Układ regulacji napięcia}
-Układ regulacji napięcia, przedstawiony na rysunku \ref*{rys:voltage_regulation}, składa się z 2 połączonych ze sobą części.
+Układ regulacji napięcia, przedstawiony na rysunku  \ref{rys:voltage_regulation},
+składa się z 2 połączonych ze sobą części.
 
-Pierwszą z nich jest przetwornica typu step-up, zbudowana w oparciu o układ ME210833P. Jej zastosowanie pozwala na zapewnienie zasilania gdy napięcie na połączonych szeregowo superkondesatorach spadnie poniżej 3,3V. Pozwoli to na rozładowanie ich do łącznego napięcia około 1V, co wynika z ograniczeń układu sterującego przetwornicy\cite{ME2108A33P}. W momencie gdy napięcie wejściowe przetwornicy przekroczy 3,3V, zostanie ona pominięta, przez diodę Schottky'ego podłączoną pomiędzy jej wejściem i wyjściem.
+Pierwszą z~nich jest przetwornica typu step-up, zbudowana w~oparciu o~układ 
+ME210833P. Jej zastosowanie pozwala na zapewnienie zasilania gdy napięcie na 
+połączonych szeregowo superkondesatorach spadnie poniżej \SI{3,3}{\volt}. 
+Pozwoli to na rozładowanie ich do łącznego napięcia około \SI{1}{\volt}, 
+co wynika z~ograniczeń układu sterującego przetwornicy\cite{ME2108A33P}. 
+W~momencie gdy napięcie wejściowe przetwornicy przekroczy \SI{3,3}{\volt}, 
+zostanie ona pominięta, przez diodę Schottky'ego podłączoną pomiędzy jej 
+wejściem i~wyjściem.
 
-Napięcie jest następnie ograniczane do wartości 3.3V z użyciem regulatora liniowego HT7333 o niskim spadku napięcia (rzędu 80mV\cite{HT7333}), i niskim prądzie spoczynkowym (o maksymalnej wartości \qty{8}{\micro\ampere}\cite{HT7333}).
+Napięcie jest następnie ograniczane do wartości 3.3V przy użyciu regulatora 
+liniowego HT7333 o~niskim spadku napięcia (rzędu \SI{80}{\milli\volt}), 
+i~niskim prądzie spoczynkowym (o maksymalnej wartości \SI{8}{\micro\ampere})
+\cite{HT7333}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{fig/voltage_regulation_section.png}
-    \caption{Układ regulacji napięcia oparty o przetwornicę step-up i regulator liniowy.}
+    \caption{Układ regulacji napięcia oparty o przetwornicę step-up i regulator liniowy}
     \label{rys:voltage_regulation}
 \end{figure}
 
 
 \section{Mikrokontroler ATmega328P}
 \label{section:atmega328p}
-Ze~względu na popularność mikrokontrolerów rodziny AVR i wykorzystanie ich w platformach takich jak Arduino UNO\cite{Arduino_Uno_Product_Page} czy Arduino NANO\cite{Arduino_Nano_Product_Page}, posiadają one rozbudowany ekosystem zapewniający narzędzia potrzebne do ich oprogramowania.
-
-Mikrokontroler został wyposażony w 3,6864 MHz oscylator kwarcowy. Wartość ta została wybrana ze względu na wygodę generowania standardowych prędkości UART dla których dzielniki, przy takiej częstotliwości, są liczbami całkowitymi \cite{UART_baudrate_calculator}.
-
-Schemat połączeń mikrokontrolera widoczny jest na rysunku \ref*{rys:atmega328p_in_schematic}, a opis funkcji portów jest przedstawiony w tabeli \ref*{tab:microcontroller_port_functions}.
+% Ze względu na popularność mikrokontrolerów rodziny AVR i~wykorzystanie ich 
+% w~platformach takich jak Arduino UNO\cite{Arduino_Uno_Product_Page} 
+% czy Arduino NANO\cite{Arduino_Nano_Product_Page}, posiadają one rozbudowany 
+% ekosystem zapewniający narzędzia potrzebne do ich oprogramowania.
+Jako jednostkę sterującą pracą urządzenia wybrano mikrokontroler ATmega328p rodziny
+AVR firmy Atmel. Został wyposażony w \SI{8}{\mega\hertz} oscylator kwarcowy. 
+Schemat połączeń mikrokontrolera widoczny jest na 
+rysunku~\ref{rys:atmega328p_in_schematic}, a~opis funkcji jego wyprowadzeń 
+został przedstawiony w~tabeli~\ref{tab:microcontroller_port_functions}.
 
 \begin{table}[h!]
     \centering
-    \caption{Opis funkcji wyprowadzeń mikrokontrolera. Typy portów: I/O - cyfrowy port wejścia/wyjścia, Tn - podłączenie do wewnętrznego licznika n mikrokontrolera, ADC - wejście konwertera analogowo-cyfrowego.}
-    \begin{tabular}{|r|c|p{0.65\linewidth}|}
+    \caption{Funkcje wyprowadzeń mikrokontrolera}
+    \label{tab:microcontroller_port_functions}
+
+    \begin{tabular}{|c|c|p{0.62\linewidth}|}
         \hline
-        Port & Przeznaczenie pinu & Funkcja \\
+        Pin & Typ pinu & Funkcja \\
         \hline
-        PB0 & I/O & Sterowanie zasilaniem urządzeń magistrali $I^2C$. \\
-        PC4 & I/O & Linia danych magistrali $I^2C$. \\
-        PC5 & I/O & Linia sygnału zegarowego magistrali $I^2C$. \\
+        PB0 & Wyjście &
+        Sterowanie zasilaniem urządzeń magistrali \isqrc. \\
+        PC4 & Dwukierunkowy &
+        Linia danych magistrali \isqrc (SDA). \\
+        PC5 & Dwukierunkowy &
+        Linia zegarowa magistrali \isqrc (SCL). \\
         \hline
-        PB1 & I/O & Sterowanie zasilaniem urządzeń magistrali 1Wire. \\
-        PD3 & I/O & Linia danych magistrali 1Wire. \\
+        PB1 & Wyjście &
+        Sterowanie zasilaniem urządzeń magistrali 1-Wire. \\
+        PD3 & Dwukierunkowy &
+        Linia danych magistrali 1-Wire. \\
         \hline
-        PD6 & I/O & Sterowanie zasilaniem dla nadajnika radiowego \\
-        PD7 & I/O & Linia danych nadajnika radiowego \\
+        PD6 & Wyjście &
+        Sterowanie zasilaniem nadajnika radiowego. \\
+        PD7 & Dwukierunkowy &
+        Linia danych nadajnika radiowego. \\
         \hline
-        PB2 & I/O & Sterowanie zasilaniem dla modułu radiometrycznego.\\
-        PD3 & T1 & Zliczanie impulsów modułu radiometrycznego. \\
+        PB2 & Wyjście &
+        Sterowanie zasilaniem modułu radiometrycznego. \\
+        PD3 & Wejście licznikowe &
+        Zliczanie impulsów z modułu radiometrycznego. \\
         \hline
-        PC0 & ADC & Badanie napięcia na 1 z 2 superkondensatorów. \\
-        PC1 & ADC & Badanie napięcia połączonych szeregowo superkondensatorów. \\
+        PC0 & ADC &
+        Pomiar napięcia pierwszego superkondensatora. \\
+        PC1 & ADC &
+        Pomiar napięcia dwóch superkondensatorów połączonych szeregowo. \\
         \hline
     \end{tabular}
-    \label{tab:microcontroller_port_functions}
 \end{table}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{fig/atmega328p_in_schematic.png}
-    \caption{Mikrokontroler ATmega328P widoczny na schemacie projektu.}
+    \caption{Mikrokontroler ATmega328P widoczny na schemacie projektu}
     \label{rys:atmega328p_in_schematic}
 \end{figure}
 
 
-\section{Magistrala $I^2C$}
+\section{Magistrala \isqrc}
 \label{section:i2c_hardware}
-$I^2C$ jest magistralą i protokołem synchronicznym umożliwiającym komunikację pomiedzy urządzeniami z użyciem 2 połączeń: zegarowego (oznaczanego jako SCL) oraz danych (oznaczanego jako SDA). Wykorzystane w tym celu wyprowadzenia mikrokontrolera widoczne są w tabeli \ref{tab:microcontroller_port_functions}. W projekcie użyte zostały 3 urządzenia używające tej magistrali: AHT20, BMP280 i VEML7700, które zostaną omówione w rozdziale \ref{section:devices}. 
-
-Dodatkowo, w celu konserwacji energii, linia zasilania urządzeń tej magistrali może zostać odłączona poprzez podanie stanu wysokiego na tranzystor widoczny na rysunku \ref{rys:i2c_voltage_enable}. Aby zabezpieczyć niezasilone urządzenia magistral przed napięciem, mogącym się pojawić na liniach SDA i SCL, zostały zastosowane konwertery poziomów logicznych (ang. \textit{level shifters}), pokazane na rysunku \ref*{rys:i2c_level_shifters}. Jednocześnie rezystory w nich zastosowane pełnią funkcję rezystorów podciągających dla lini SDA i SCL, wymaganych przez specyfikację standardu $I^2C$ \cite{I2C_specification}.
+Obsługa magistrali realizowana jest przez dwa wyprowadzenia mikrokontrolera:
+PC4 i~PC5. Dodatkowo użyty został pin PB0 jako pin załączający zasilanie
+dla urządzeń magistrali, gdy pojawi się na nim stan niski 
+(rysunek~\ref{rys:i2c_voltage_enable}).
+Aby zabezpieczyć te urządzenia przed możliwym napięciem na linii zegarowej
+i~linii danych w~momencie odłączenia linii zasilania zastosowano dla nich 
+konwertery stanów logicznych \translation{level shifter}, widoczne na
+rysunku~\ref{rys:i2c_level_shifters}. Jednocześnie rezystory konwertera 
+służą za rezystory podciągające wymagane przez standard 
+\isqrc{}~\cite{I2C_specification}.
 
 \begin{figure}[H]
     \centering
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{fig/i2c_voltage_enable.png}
-        \caption{Tranzystor załączający linię zasilania urządzeń magistrali $I^2C$.}
+        \caption{Tranzystor załączający linię zasilania urządzeń magistrali \isqrc}
         \label{rys:i2c_voltage_enable}
     \end{minipage}
     \begin{minipage}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{fig/i2c_voltage_shifters.png}
-        \caption{Konwertery poziomów logicznych dla linii SDA i SCL magistrali $I^2C$.}
+        \caption{Konwertery poziomów logicznych dla linii SDA i SCL magistrali \isqrc}
         \label{rys:i2c_level_shifters}
     \end{minipage}
 \end{figure}
 
+
 \section{Układ komunikacji radiowej}
-Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych modułu nadajnika radiowego. Odpowiedzialność za przygotowanie i buforowanie danych w całości spoczywa na mikrokontrolerze. Z racji dużego poboru mocy przez układ radiowy [TODO: Wstaw pobór mocy], linia zasilania, podobnie jak w przypadku magistrali $I^2C$, została wyposażona w odcinający przepływ prądu tranzystor i konwerter stanów logicznych dla linii danych, jak pokazano na rysunku [TODO: Wstaw rysunek]. 
+Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych 
+modułu nadajnika radiowego podłączoną do pinu PD7 mikrokontrolera. 
+Przygotowanie i~buforowanie danych spoczywa na jednostce centralnej. 
+Z~racji dużego i~ciągłego poboru mocy przez układ radiowy linia zasilania, 
+podobnie jak w przypadku magistrali  \isqrc, została wyposażona 
+w~odcinający przepływ prądu tranzystor, a~linia danych w~konwerter stanów 
+logicznych, jak pokazano na rysunku [TODO: Wstaw rysunek].
 
-\section{Elementy pomiarowe}
+\section{Moduł radiometryczny}
+Moduł detekcji promieniowania jonizującego wykorzystuje licznik Geigera-Müllera 
+oparty na projekcie opublikowanym na forum 
+Elektroda~\cite{elektroda_licznik_geigera}, zmodyfikowanym na potrzeby 
+niniejszej pracy przez inż. Karola Karpowicza (rysunek~[TODO: Wstaw zdjęcie]). 
+Układ składa się z licznika Geigera-Müllera typu J321, 
+wzmacniacza impulsów oraz generatora wysokiego napięcia. 
+
+W~chwili detekcji cząstki promieniowania na wyjściu modułu generowany jest 
+impuls, podawany następnie na wzmacniacz zbudowany na tranzystorze NPN, 
+widoczny na rysunku [TODO: Wstaw rysunek]. 
+
+Zastosowany również został liniowy regulator napięcia \SI{2,5}{\volt} 
+zaopatrujący moduł w~odpowiednie napięcie (rysunek [TODO: Wstaw rysunek]).
+
+\section{Pozostałe elementy pomiarowe}
 \label{section:devices}
-\section{Barometr, higrometr i termometr}
-Urządzenie zostało wyposażone w 2 moduły znajdujące się na wspólnej płytce:
-\begin{itemize}
-    \item BMP280 --- mogący mierzyć temperaturę i ciśnienie atmosferyczne;
-    \item AHT20 --- mogący mierzyć temperaturę i wilgotność względną.
-\end{itemize}
-Obydwa moduły używają magistrali $I^2C$ do komunikacji.
-[TODO: Rozwiń]
-    
-\section{Moduł z licznikiem Geigera-Müllera}
-Moduł detekcji promieniowania jonizującego wykorzystuje licznik Geigera-Müllera oparty na projekcie opublikowanym na forum Elektroda~\cite{elektroda_licznik_geigera}, zmodyfikowanym na potrzeby niniejszej pracy przez inż. Karola Karpowicza (rysunek~[TODO: Wstaw zdjęcie]). Układ składa się z licznika Geigera-Müllera typu J321, wzmacniacza impulsów oraz generatora wysokiego napięcia. W chwili detekcji cząstki promieniowania na wyjściu modułu generowany jest impuls, który podawany jest na wejście licznikowe mikrokontrolera. Implementacja algorytmu zliczania impulsów została omówiona w rozdziale~\ref{section:geiger_code}.
+Pozostałe 3 elementy pomiarowe używają wspólnej magistrali \isqrc.
+Moduły AHT20 i~BMP280 znajdują się na jednej płytce z~połączonymi wyprowadzeniami
+więc projekt przewiduje dla nich wspólne wyjście, a~moduł VEML7700 posiada 
+oddzielne wyjście. 
 
-\section{Moduł pomiaru natężenia światła}
-Za pomiar natężenia światła odpowiedzialny jest moduł VEML7700. Podobnie jak BMP280 i AHT20 komunikuje się z mikrokontrolerem używając protokołu $I^2C$. Natężenie światła mierzone jest w luksach. [TODO: Rozwiń?]
+\section{Pozostałe wyprowadzenia}
+Schemat przewiduje dodatkowe wyprowadzenia dla komunikacji SPI 
+(\textit{Serial Peripheral Interface}) w~celu umożliwienia programowania
+mikrokontrolera. Dodatkowo, aby móc komunikować się za pośrednictwem 
+portu szeregowego przewidziane zostało wyprowadzenie dla interfejsu UART.
 
-\section{Elementy dodatkowe}
-\section{Magistrala 1-Wire}
-[Nie zaimplementowane]
+Na schemacie znajduje się również wyjście i~układ sterowania zasilaniem dla 
+interfejsu 1-Wire, odpowiednio wyjścia PB1 i~PD3. Mimo, że obecnie nie jest 
+wspierany przez oprogramowanie, może być wykorzystany w~przyszłych 
+iteracjach projektu.
 
-\section{Wolne wyprowadzenia GPIO}
-[Nie zaimplementowane]
+Aby zapewnić możliwość dodania dodatkowych modułów obsługujących magistralę
+\isqrc, zostało przewidziane dodatkowe jej wyprowadzenie.
