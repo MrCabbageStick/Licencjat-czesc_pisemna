@@ -148,3 +148,107 @@ impl Standby for Standby0_5ms{   const BITS: u8 = 0b000; }
 pub struct IIROff;
 impl IIRConstant for IIROff{ const BITS: u8 = 0b000; }
 \end{lstlisting}
+
+\subsection*{Inicjalizacja}
+Proces inicjalizacji modułu, przedstawiony na listingu \ref{lst:bmp280_init}, odbywa się w~3 
+krokach.
+Na początku wysyłane są dane do rejestru \textit{CTRL\_MEAS}, odpowiedzialnego za
+konfigurację pomiarów. 
+Następnie uzupełniany jest rejestr \textit{CONFIG}, regulujący pracę modułu.
+Na koniec, po odczekaniu \SI{2}{\milli\second} wymaganych na zapis danych, 
+odczytywane są dane kompensacyjne.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Inicjalizacja modułu BMP280},
+    label={lst:bmp280_init}
+]
+pub fn init<D: DelayNs>(&mut self, i2c: &mut I2c, delay: &mut D) 
+-> Result<(), i2c::Error>{
+    i2c.write(
+        self.address, 
+        &[CTRL_MEAS_REGISTER_ADDRESS, Self::CTRL_MEAS_VALUE]
+    )?;
+    i2c.write(
+        self.address, 
+        &[CONFIG_REGISTER_ADDRESS, Self::CONFIG_VALUE]
+    )?;
+
+    delay.delay_ms(2);
+
+    self.compensations = Some(
+        Bmp280Compensations::read_from_i2c(self.address, i2c)?
+    );
+
+    Ok(())
+}
+\end{lstlisting}
+
+\subsection*{Odczyt danych}
+Odczyt surowych danych z~modułu odbywa się poprzez odczytanie wartości 
+z~pamięci modułu poczynając od pierwszego bajtu kodującego wartość ciśnienia.
+Wartość ciśnienia i~temperatury zapisana jest na 6 bajtach, a~same wartości
+zapisane są jako liczby 20-bitowe, wprowadza to wymóg konwersji typu
+liczbowego na obsługiwany przez język typ \texttt{i32}. Proces ten pokazano
+na listingu~\ref{lst:bmp280_read_raw}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Odczyt surowych danych z modułu BMP280},
+    label={lst:bmp280_read_raw}
+]
+pub fn read_raw(&self, i2c: &mut I2c) 
+-> Result<Bmp280RawData, i2c::Error>{
+        let mut buffer = [0u8; 6];
+
+        i2c.write_read(
+            self.address, 
+            &[PRESSURE_MS_BYTE_ADDRESS], 
+            &mut buffer
+        )?;
+
+        // Raw temperature and pressure are both 20 bit values
+        Ok(Bmp280RawData { 
+            temperature: 
+                ((buffer[3] as i32) << 12) 
+                | ((buffer[4] as i32) << 4) 
+                | ((buffer[5] as i32) >> 4), 
+            pressure: 
+                ((buffer[0] as i32) << 12) 
+                | ((buffer[1] as i32) << 4) 
+                | ((buffer[2] as i32) >> 4),
+        })
+    }
+\end{lstlisting}
+
+\subsection*{Konwersja danych}
+Proces konwersji surowych wartości ciśnienia i~temperatury na wartości 
+rzeczywiste jest dokładnie opisany w~nocie katalogowej 
+BMP280~\cite{bmp280_datasheet}, gdzie podano funkcję zapisane w~języku C. 
+Funkcje konwersji napisane na potrzeby tej pracy są ich odzwierciedleniem
+w~języku Rust.
+Warto jednak zaznaczyć, że funkcja \texttt{convert\_raw\_temp} odpowiedzialna
+za konwersję temperatury, w~odróżnieniu od funkcji podanej w~nocie katalogowej,
+zwraca krotkę dwóch liczb, gdzie pierwszą jest przekonwertowana wartość
+temperatury, a~drugą liczba \texttt{t\_fine} potrzebna do konwersji
+wartości ciśnienia.
+
+\subsection*{Odczyt pełnych danych}
+Implementacja struktury \texttt{Bmp280} upublicznia funkcję \texttt{read}
+łączącą odczyt i~konwersję danych, pokazano ją 
+w~listingu~\ref{lst:bmp280_read}.
+
+\begin{lstlisting}[language=Rust, style=colouredRust, 
+    caption={Funkcja \texttt{read} struktury \texttt{Bmp280}},
+    label={lst:bmp280_read}
+]
+pub fn read(&self, i2c: &mut I2c) 
+-> Result<Bmp280Data, Bmp280ReadError>{
+    let raw = self.read_raw(i2c)?;
+    
+    let (temperature, fine_temp) = 
+        self.convert_raw_temp(raw.temperature)?;
+
+    let pressure = self.convert_raw_pressure(raw.pressure, fine_temp)?;
+
+    Ok(Bmp280Data { temperature, pressure })
+}
+\end{lstlisting}
