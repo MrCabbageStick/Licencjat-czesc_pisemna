@@ -1,18 +1,116 @@
 \section{Moduł z licznikiem Geigera-Müllera}
 \label{section:geiger_code}
-Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}. Sprzętowy licznik T1 mikrokontrolera skonfigurowany jest do zliczania impulsów zewnętrznych generowanych przez lampę [AI mówi rurę] Geigera-Müllera. Co sekundę zliczona wartość jest odczytywana i zapisywana do 60-elementowego bufora cyklicznego.
+Obsługa licznika odbywa się za pośrednictwem struktury \texttt{GeigerCounter}.
+Posiada ona 60--elementowy bufor 16--bitowych liczb całkowitych,
+32-bitową sumę wartości bufora, referencję do licznika T1 oraz pola pomocnicze.
+Cała struktura została przedstawiona na listingu~\ref{lst:geiger_counter_struct}.
 
-Funkcja \texttt{cpm} zwraca liczbę zliczeń na minutę poprzez ekstrapolację zsumowanych wartości bufora na pełną minutę, nawet w przypadku niepełnego zapełnienia bufora. Takie podejście ma dwie konsekwencje: przy czasie pracy krótszym niż minuta wynik może być obarczony większym błędem, natomiast przy pełnym buforze nagłe skoki wartości są wygładzane przez uśrednianie.
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{GeigerCounter}},
+    label={lst:geiger_counter_struct}
+]
+pub struct GeigerCounter<'a>{
+    counts: [u16; 60],
+    index: usize,
+    sum: u32,
+    filled: u8,
+    timer: &'a TC1,
+}
+\end{lstlisting}
 
-Kod odpowiedzialny za odczyt i reset licznika T1 przedstawiono na listingu~\ref{lst:read_geiger_counter}. W celu zabezpieczenia przed przerwaniem wykonywania kodu zastosowano funkcję \texttt{interrupt::free} z biblioteki \texttt{avr\_device}.
+\subsection*{Konfiguracja licznika}
+Sprzętowy licznik T1 mikrokontrolera skonfigurowany jest do zliczania impulsów 
+zewnętrznych generowanych przez moduł radiometryczny. Użyte dane konfiguracyjne
+pochodzą z~dokumentacji mikrokontrolera ATmega328p~\cite{ATmega328p}.
+Metoda konfiguracyjna została przedstawiona na listingu~\ref{lst:init_geiger_counter}
+i~sprowadza się do zapisania konfiguracji do 2~rejestrów kontrolnych licznika
+T1: \textit{TCCR1A} i~\textit{TCCR1B}.
 
-\begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt zliczeń licznika T1 mikrokontrolera},
-                   label={lst:read_geiger_counter}]
-fn timer1_read_and_reset(tc1: &TC1) -> u16{
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Metoda \texttt{init} struktury \texttt{GeigerCounter}},
+    label={lst:init_geiger_counter}
+]
+/// Sets up `self.timer` as an external pulse counter
+pub fn init(&self){
+    let tc = self.timer;
+
+    unsafe {
+        tc.tccr1a().write(|w| w.wgm1().bits(0b00));
+
+        tc.tccr1b().write(|w| {
+            w.wgm1().bits(0b00)
+                .cs1().bits(0b111)
+        });
+
+        tc.tcnt1().write(|w| w.bits(0));
+    }
+}
+\end{lstlisting}
+
+\subsection*{Odczyt licznika}
+Struktura \texttt{GeigerCounter} udostępnia metodę \texttt{tick}
+służącą do odczytania 16--bitowej wartości licznika T1 (z~rejestrów TCNT1L 
+i~TCNT1H), wyzerowania go i~zapisania odczytanej wartości do bufora.
+Bufor traktowany jest jako cykliczny, a początkowo wypełniony jest 
+zerami.
+Docelowo metoda \texttt{tick} powinna być wykonywana co sekundę, aby 
+wypełnienie bufora zajęło jedną minutę.
+Listing \ref{lst:read_geiger_counter} przedstawia metodę \texttt{tick} oraz pomocniczą, 
+nie publiczną metodę \texttt{read\_and\_reset\_timer} służącą do odczytania 
+i~wyzerowania wartości licznika T1.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Metoda \texttt{init} struktury \texttt{GeigerCounter}},
+    label={lst:read_geiger_counter}
+]
+pub fn tick(&mut self){
+    self.sum -= self.counts[self.index] as u32;
+
+    let count = self.read_and_reset_timer();
+
+    self.counts[self.index] = count;
+    self.sum += count as u32;
+
+    // Advance index, wrapping at 60
+    self.index = if self.index == 59 { 0 } else { self.index + 1 };
+
+    if self.filled < 60 {
+        self.filled += 1;
+    }
+}
+
+fn read_and_reset_timer(&self) -> u16{
+    let tc = self.timer;
+
     avr_device::interrupt::free(|_| unsafe {
-        let val = tc1.tcnt1().read().bits();
-        tc1.tcnt1().write(|w| w.bits(0));
+        let val = tc.tcnt1().read().bits();
+        tc.tcnt1().write(|w| w.bits(0));
         val
     })
+}
+\end{lstlisting}
+
+\subsection*{Odczyt zliczeń na minutę}
+Zliczenia na minutę (ang. \textit{counts per minute}, CPM) określają liczbę 
+cząstek zliczonych przez licznik promieniowania w~ciągu minuty.
+Aby uzyskać tą wartość ze struktury \texttt{GeigerCounter} udostępniona została
+metoda \texttt{cpm} pokazana na listingu~\ref{lst:geiger_counter_cpm}.
+Zwraca ona wartość poprzez ekstrapolację zsumowanych wartości bufora na czas
+pełnej minuty. Podejście to niesie ze sobą dwie konsekwencje: przy czasie pracy 
+krótszym niż minuta wynik obarczony jest błędem, natomiast przy pełnym buforze
+uśredniane są nagłe skoki w~ilości zliczeń.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Metoda \texttt{cpm} struktury \texttt{GeigerCounter}},
+    label={lst:geiger_counter_cpm}
+]
+/// Counts per minute
+pub fn cpm(&self) -> u32{
+    // Scale to 60 seconds even before buffer is full
+    self.sum * 60 / self.filled as u32
 }
 \end{lstlisting}
