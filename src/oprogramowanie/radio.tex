@@ -1,1 +1,28 @@
 \section{Obsługa modułu radiowego}
+Obsługa modułu radiowego realizowana jest poprzez autorską 
+bibliotekę \texttt{ook\_433mhz} realizującą przesył i~odczyt
+danych z~prostych nadajników radiowych, używając metody
+\textit{On--Off Keying} (OOK).
+Biblioteka jest mocno inspirowana biblioteką
+\texttt{RadioHead}, ze szczególnym naciskiem na zawartą w~niej 
+klasę \texttt{RH\_ASK}.
+
+Ten podrozdział jest poświęcony obsłudze nadajnika radiowego
+(struktura \texttt{Transmitter} biblioteki \texttt{ook\_433mhz})
+i~nie będzie zagłebiał się w~implementacje obsługi odbiornika.
+
+\subsection{\textit{On-Off Keying}}
+
+\subsection{Przebieg transmisji}
+Transmisję danych można podzielić na 3~etapy: synchronizację,
+wysłanie bajtu startu i~wysłanie ramki danych.
+Sygnał synchronizujący składa się z~3~bajtów wypełnionych 
+naprzemiennie bitami o~wartościach~1~i~0 i~służy do 
+przygotowania odbiornika na odczyt danych.
+Bajt startu (zdefiniowany w~bibliotece stałą \texttt{START\_BYTE})
+przyjmuje formę liczby o~zapisie binarnym \texttt{11001100}.
+Struktura ramki obejmuje pole długości, zawierające informację 
+o~liczbie przesyłanych bajtów, oraz następujące po nim 
+dane właściwe.
+
+\subsection{Struktura \texttt{Transmitter}}
