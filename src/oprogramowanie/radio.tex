@@ -11,8 +11,6 @@ Ten podrozdział jest poświęcony obsłudze nadajnika radiowego
 (struktura \texttt{Transmitter} biblioteki \texttt{ook\_433mhz})
 i~nie będzie zagłebiał się w~implementacje obsługi odbiornika.
 
-\subsection{\textit{On-Off Keying}}
-
 \subsection{Przebieg transmisji}
 Transmisję danych można podzielić na 3~etapy: synchronizację,
 wysłanie bajtu startu i~wysłanie ramki danych.
@@ -89,4 +87,28 @@ pub struct Transmitter<const TICKS_PER_BIT: u8, Pin: OutputPin> {
 \end{lstlisting}
 
 
-\subsection{Przygotowanie danych, kodowanie 4b6}
+\subsection{Przygotowanie danych, kodowanie 4b6b}
+Kodowanie 4B6B \translation{ang. 4--bit/6--bit} to schemat kodowania liniowego, 
+w~którym  każdej 4--bitowej grupie danych (16 możliwych kombinacji) przypisywana 
+jest odpowiadająca jej 6--bitowa grupa kodowa (spośród 64 możliwych kombinacji). 
+Dodanie dwóch nadmiarowych bitów pozwala na taki dobór sekwencji wyjściowych, 
+aby spełniały one dwa warunki: ograniczały maksymalną liczbę kolejnych jedynek 
+i~zer w~strumieniu (tzw. kodowanie RLL, ang. \textit{run-length limited}) oraz 
+zapewniały zbalansowany ich udział \translation{DC balance}. 
+Dzięki temu przesyłany sygnał zawiera regularne przejścia między stanami,
+co ułatwia odbiornikowi odtworzenie zegara transmisji \translation{clock recovery}
+bezpośrednio z~odbieranego sygnału, bez potrzeby przesyłania osobnego sygnału 
+taktującego.
+
+Za przygotowanie danych dla nadajnika odpowiada metoda \texttt{send} struktury
+\texttt{Transmitter}, przedstawiona na listingu~\ref{}. 
+Sprawdza ona czy bajty wysyłanej wiadomość, po zakodowaniu, zmieszczą się 
+w~buforze. W~przypadku, gdy wiadomość jest zbyt długa, zostaje ona przycięta
+do maksymalnej możliwej długości (określonej stałą \texttt{MAX\_MESSAGE\_LENGTH}).
+Następnie jako pierwszy bajt bufora zapisywany jest rozmiar wiadomości w~bajtach
+przed kodowaniem, kolejne bajty bufora uzupełnione są zawartością wiadomości.
+Tak przygotowany bufor zawsze będzie przynajmniej w~połowie niewykorzystany,
+co pozwala na zakodowanie jego zawartości metodą \texttt{encode\_in\_place} modułu
+\texttt{data\_coding::radio\_head\_4b6b}
+Metoda określa ilość bajtów ramki jaką nadajnik musi wysłać
+Funkcja zwraca informację o~ilości użytych bajtów.
