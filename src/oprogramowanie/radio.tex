@@ -25,4 +25,68 @@ Struktura ramki obejmuje pole długości, zawierające informację
 o~liczbie przesyłanych bajtów, oraz następujące po nim 
 dane właściwe.
 
+Dane transmitowane są poczynając od najmłodszego bitu każdego bajtu.
+Same bity podzielone są na próbki (nazywane w~programie angielskim słowem 
+\textit{tick}) używane do sterowania linią danych nadajnika radiowego.
+Każda próbka przyjmuje wartość 0~lub~1, identyczną co wartości bitu, który 
+buduje.
+
+\subsection{Maszyna stanów}
+Struktura \texttt{Transmitter} posiada pole \texttt{state} określające obecny 
+stan nadajnika, wybrany spośród pięciu wartości opisanych w~typie wyliczeniowym
+\texttt{TxState} i~są to:
+\begin{enumerate}
+    \item \textbf{\texttt{Idle}} --- stan ustawiany jako domyślny i~osiągany
+    w~momencie zakończenia transmisji.
+
+    \item \textbf{\texttt{Syncing}} --- stan, podczas którego wysyłane są bajty 
+    sygnału synchronizującego, przypisywany nadajnikowi w~momencie, gdy dane 
+    w~buforze są gotowe do wysłania.
+    
+    \item \textbf{\texttt{SendingStartByte}} --- stan osiągany po wysłaniu wszystkich
+    wymaganych bajtów synchronizacyjnych, w~którym nadajnik wysyła bajt startu.
+    
+    \item \textbf{\texttt{SendingData}} --- stan, w~którym nadajnik wysyła
+    zawartość buforu, osiągany po wysłaniu bajtu startu.
+    
+    \item \textbf{\texttt{DataSent}} --- stan osiągany po wysłaniu całej zawartości
+    bufora.
+\end{enumerate}
+
 \subsection{Struktura \texttt{Transmitter}}
+Struktura \texttt{Transmitter}, pokazana na listingu~\ref{lst:transmitter_struct},
+przechowuje informacje niezbędne do prawidłowego nadania danych i~określenia
+obecnego stanu nadajnika.
+
+Głównym zadaniem pól \texttt{bit\_index} oraz \texttt{byte\_index} jest okreslenie,
+który bajt i~zawarty w~nim bit powinien być w~danym momencie wysyłany.
+
+Pole \texttt{buffer} przechowuje zakodowane dane przeznaczone do wysłania.
+Jego wielkość ograniczona jest przez stałą czasu kompilacji 
+\texttt{MAX\_BUFFER\_SIZE}. Bufor inicjalizowany jest wartościami zerowymi
+i~nie następuje jego czyszczenie podczas pracy nadajnika, jest on jedynie
+nadpisywany nowymi wartościami, których długość określa pole 
+\texttt{message\_bit\_length}. 
+
+Struktura posiada również parametr typu generycznego \texttt{TICKS\_PER\_BIT}
+określający ilość próbek potrzebnych na przesłanie jednego bitu. Parametr ten
+określany jest w~czasie kompilacji.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Transmitter}},
+    label={lst:transmitter_struct}
+]
+pub struct Transmitter<const TICKS_PER_BIT: u8, Pin: OutputPin> {
+    buffer: [u8; MAX_BUFFER_SIZE],
+    message_bit_length: usize,
+    bit_index: usize,
+    byte_index: usize,
+    state: TxState,
+    pub pin: Pin,
+    ticks: u8,
+}
+\end{lstlisting}
+
+
+\subsection{Przygotowanie danych, kodowanie 4b6}
