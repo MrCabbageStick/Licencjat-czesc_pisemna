@@ -1,7 +1,7 @@
 \section{Obsługa modułu radiowego}
 Obsługa modułu radiowego realizowana jest poprzez autorską 
 bibliotekę \texttt{ook\_433mhz} realizującą przesył i~odczyt
-danych z~prostych nadajników radiowych, używając metody
+danych z~prostych nadajników radiowych używając metody
 \textit{On--Off Keying} (OOK).
 Biblioteka jest mocno inspirowana biblioteką
 \texttt{RadioHead}, ze szczególnym naciskiem na zawartą w~niej 
@@ -88,7 +88,7 @@ pub struct Transmitter<const TICKS_PER_BIT: u8, Pin: OutputPin> {
 
 
 \subsection{Przygotowanie danych, kodowanie 4b6b}
-Kodowanie 4B6B \translation{ang. 4--bit/6--bit} to schemat kodowania liniowego, 
+Kodowanie 4B6B \translation{4--bit/6--bit} to schemat kodowania liniowego, 
 w~którym  każdej 4--bitowej grupie danych (16 możliwych kombinacji) przypisywana 
 jest odpowiadająca jej 6--bitowa grupa kodowa (spośród 64 możliwych kombinacji). 
 Dodanie dwóch nadmiarowych bitów pozwala na taki dobór sekwencji wyjściowych, 
@@ -100,8 +100,8 @@ co ułatwia odbiornikowi odtworzenie zegara transmisji \translation{clock recove
 bezpośrednio z~odbieranego sygnału, bez potrzeby przesyłania osobnego sygnału 
 taktującego.
 
-Za przygotowanie danych dla nadajnika odpowiada metoda \texttt{send} struktury
-\texttt{Transmitter}, przedstawiona na listingu~\ref{}. 
+Za przygotowanie danych do nadania odpowiada metoda \texttt{send} struktury
+\texttt{Transmitter}, przedstawiona na listingu~\ref{lst:transmitter_send}. 
 Sprawdza ona czy bajty wysyłanej wiadomość, po zakodowaniu, zmieszczą się 
 w~buforze. W~przypadku, gdy wiadomość jest zbyt długa, zostaje ona przycięta
 do maksymalnej możliwej długości (określonej stałą \texttt{MAX\_MESSAGE\_LENGTH}).
@@ -110,5 +110,53 @@ przed kodowaniem, kolejne bajty bufora uzupełnione są zawartością wiadomośc
 Tak przygotowany bufor zawsze będzie przynajmniej w~połowie niewykorzystany,
 co pozwala na zakodowanie jego zawartości metodą \texttt{encode\_in\_place} modułu
 \texttt{data\_coding::radio\_head\_4b6b}
-Metoda określa ilość bajtów ramki jaką nadajnik musi wysłać
-Funkcja zwraca informację o~ilości użytych bajtów.
+Ilość bitów zakodowanej ramki, gotowej do wysłania przez nadajnik,
+określa się sumując ilość bajtów niezakodowanej wiadomości z~ilością
+bajtów kodujących jej rozmiar, następnie mnożąc tą wartością przez 
+stałą określającą narzut pochodzący z~kodowania zapisaną jako ilość bitów na bajt. 
+Funkcja zwraca informację o~ilości bajtów zapisanych do bufora
+w~celu umożliwienia wysłania większej ilości danych dzieląc je na 
+wysyłane oddzielnie fragmenty.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Metode \texttt{send} struktury \texttt{Transmitter}},
+    label={lst:transmitter_send}
+]
+pub fn send(&mut self, bytes: &[u8]) -> Option<usize> {
+    let n_bytes = if bytes.len() > MAX_MESSAGE_LENGTH {
+        MAX_MESSAGE_LENGTH
+    } else {
+        bytes.len()
+    };
+
+    // Set message length as first byte
+    self.buffer[0] = n_bytes as u8;
+    // Populate buffer
+    self.buffer[1..=n_bytes].copy_from_slice(&bytes[0..n_bytes]);
+
+    self.message_bit_length = (n_bytes + 1) * 6 * 2;
+
+    // Encode data
+    match encode_in_place(&mut self.buffer, n_bytes + 1) {
+        Ok(_) => {
+            self.state = TxState::Syncing;
+            Some(n_bytes)
+        }
+        Err(_) => None,
+    }
+}
+\end{lstlisting}
+
+
+\subsection{Obsługa maszyny stanów}
+Struktura \texttt{Transmitter} udostępnia metodę \texttt{transmit} odpowiedzialną
+za przechodzenie pomiędzy stanami, wywoływanie funkcji pośrednich obsługujących
+poszczególne stany i~podtrzymanie stanu pinu na długość konieczną do wysłania
+wszystkich próbek dla jednego bitu.
+Funkcje pośrednie zwracają jeden z~trzech stanów, informując metodę 
+\texttt{transmit} o~etapie wykonania swoich czynności lub o~wystąpieniu błędu.
+
+Wywołanie metody transmit powinno zachodzić w~równych interwałach. W~środowisku
+systemów wbudowanych dobrym sposobem osiągnięcia tego jest zastosowanie 
+przerwań pochodzących z~liczników mikrokontrolera.
