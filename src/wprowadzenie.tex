@@ -22,7 +22,7 @@ barometr --- zajmujące się akwizycją danych
 dotyczących parametrów atmosfery w~wybranym obszarze. Dane te są 
 kluczowe w~wielu dziedzinach życia gospodarczego i~społecznego. 
 W~rolnictwie precyzyjnym \translation{smart agriculture} pozwalają 
-na optymalizację nawadniania i~ochrony upraw [TODO: citation needed], 
+na optymalizację nawadniania i~ochrony upraw, 
 w~aglomeracjach miejskich służą do monitorowania smogu i~poziomu
 zanieczyszczeń powietrza, natomiast w~systemach zarządzania 
 budynkami \translation{Building Management Systems} stanowią 
@@ -34,14 +34,14 @@ będących zbiorem czujników klimatycznych, z~których dane przesyłane
 są do stacji bazowych. Często stacje pogodowe do użytku domowego
 składają się z~samej stacji bazowej, będącej jednocześnie 
 czujnikiem klimatycznym.
-Do popularnych producentów tego segmentu należą Oregon Scientific, 
-TFA Dostmann, Netatmo oraz Bresser. 
+Do popularnych producentów tego segmentu należą Oregon Scientific~\cite{oregon_scientific_weather_stations}, 
+TFA Dostmann~\cite{tfa_dostmann_weather_stations}, Netatmo~\cite{netatmo_weather_station} oraz Bresser~\cite{bresser_weather_stations}. 
 Współczesne cyfrowe czujniki klimatyczne wyposażone są w~elektroniczne 
 moduły pomiarowe, oferujące większą precyzję i~większą wygodę odczytu 
 danych w~porównaniu do ich analogowych odpowiedników.
 W celu akwizycji danych klimatycznych z~różnych miejsc, stacje pogodowe
 wyposażone są w~czujniki komunikujące się radiowo --- najczęściej na 
-częstotliwości 433 MHz lub 868 MHz --- ze stacją bazową. 
+częstotliwości 433 MHz lub 868 MHz~\cite{tfa_dostmann_433_868mhz} --- ze stacją bazową. 
 Stacja bazowa zajmuje się przetworzeniem danych i~przekazaniem 
 ich użytkownikowi. Często wyposażona jest we własne moduły pomiarowe 
 oraz dodatkowe funkcje, na przykład zapisywanie danych historycznych.
@@ -58,16 +58,12 @@ Stanowi to bezpośrednią motywację do budowy dedykowanego systemu
 pomiarowego opartego na precyzyjnych modułach elektronicznych, 
 opisanego w~niniejszej pracy.
 
-[TODO: Sprawdź dokładność]
-
-[TODO: Może jeszcze jeden akapit? Praca Wołodko? Modularność?]
-
 \section{Moduły pomiarowe}
 Do podstawowych wielkości fizycznych rejestrowanych przez czujniki 
 klimatyczne zalicza się przede wszystkim temperaturę, wilgotność 
 względną oraz ciśnienie atmosferyczne. Obecne moduły cyfrowe 
 integrują elementy pomiarowe, dedykowane przetworniki analogowo-cyfrowe 
-(ADC, ang. \textit{analog-to-digital converter}) oraz fabryczne 
+(ADC, ang. \textit{analog--to--digital converter}) oraz fabryczne 
 obwody kalibracyjne w~jednej obudowie. Rozwiązanie takie pozwala 
 wyeliminować problem zakłóceń elektromagnetycznych indukowanych 
 w~przewodach sygnałowych. Ponadto projektanci modułów implementują 
@@ -80,21 +76,21 @@ klimatyczne, różniących się zarówno mierzonymi wielkościami
 fizycznymi, jak i~osiąganą dokładnością, zakresem pomiarowym 
 oraz stopniem integracji. Wśród popularnych modułów pomiarowych 
 temperatury i~wilgotności wyróżnić można przede wszystkim rodzinę 
-DHT (DHT11, DHT22) firmy AOSONG, charakteryzującą się niskim kosztem 
+DHT (DHT11~\cite{dht11_datasheet}, DHT22~\cite{dht22_datasheet}) firmy AOSONG, charakteryzującą się niskim kosztem 
 i~szeroką dostępnością, lecz ograniczoną dokładnością. 
 Wyższą klasę dokładnościową reprezentują moduły szwajcarskiej firmy 
-Sensirion --- seria SHT3x (SHT30, SHT31, SHT35) oraz nowsza seria 
-SHT4x (SHT40, SHT41, SHT45) oferujące dokładność pomiaru 
+Sensirion --- seria SHT3~\cite{sht3x_datasheet} (SHT30, SHT31, SHT35) oraz nowsza seria 
+SHT4x~\cite{sht4x_datasheet} (SHT40, SHT41, SHT45) oferujące dokładność pomiaru 
 temperatury na poziomie $\pm0{,}2$\,°C. W~obszarze pomiaru 
 ciśnienia atmosferycznego dominuje oferta firmy Bosch Sensortec --- 
-od popularnego BMP180, przez powszechnie stosowany BMP280, po 
-nowsze BMP388 i~BMP390 charakteryzujące się wyższą rozdzielczością. 
-Firma Bosch oferuje również moduły z~rodziny BME (BME280, BME680, 
-BME688), łączące pomiar ciśnienia, temperatury i~wilgotności 
+od popularnego BMP180~\cite{bmp180_datasheet}, przez powszechnie stosowany BMP280\cite{bmp280_datasheet}, po 
+nowsze BMP388~\cite{bmp388_datasheet} i~BMP390~\cite{bmp390_datasheet} charakteryzujące się wyższą rozdzielczością. 
+Firma Bosch oferuje również moduły z~rodziny BME (BME280~\cite{bme280_datasheet}, BME680~\cite{bme680_product}, 
+BME688~\cite{bme680_product}), łączące pomiar ciśnienia, temperatury i~wilgotności 
 w~jednej obudowie, przy czym moduły BME680 i~BME688 wyposażone są 
 dodatkowo w~czujnik gazów lotnych (VOC). Do pomiaru natężenia 
 oświetlenia w~zakresie widzialnym najczęściej stosuje się moduły 
-BH1750 firmy ROHM oraz VEML7700 firmy Vishay.
+BH1750~\cite{bh1750_datasheet} firmy ROHM oraz VEML7700~\cite{veml7700_datasheet} firmy Vishay.
 
 \section{Komunikacja z modułami}
 Komunikacja z~modułami pomiarowymi może odbywać się 
@@ -242,11 +238,12 @@ należą~\cite{KenResearchMCU2025}~\cite{ALLPCB_MCU2025}:
     charakteryzujące się prostotą programowania, spopularyzowane 
     dzięki platformie Arduino. Są optymalne dla prostych systemów 
     sterowania.
+
     \item \textbf{Rodzina ESP (Espressif Systems):} Układy ESP8266 
     oraz ESP32, które zrewolucjonizowały rynek dzięki zintegrowanym 
     modułom łączności bezprzewodowej Wi-Fi oraz Bluetooth, 
     przy zachowaniu bardzo korzystnego stosunku ceny do wydajności.
-    [TODO: Jak strona Espressif zacznie działac dodaj linki]
+
     \item \textbf{STM32 (STMicroelectronics):} 32-bitowe mikrokontrolery
     oparte na architekturze ARM Cortex-M, oferujące wysoką moc 
     obliczeniową i bogaty zestaw peryferiów, powszechnie stosowane 
@@ -301,7 +298,8 @@ MicroPython to zoptymalizowana implementacja języka Python 3,
 stworzona z~myślą o~pracy na nowoczesnych mikrokontrolerach 
 (np. ESP32, STM32). Jego kluczową zaletą jest niezwykle wysoki poziom 
 abstrakcji, prostota składni oraz interpretacja kodu w~czasie 
-rzeczywistym, co drastycznie skraca czas tworzenia prototypów.
+rzeczywistym, co drastycznie skraca czas tworzenia prototypów
+\cite{micropython_github}.
 
 Niestety, jako język interpretowany, MicroPython charakteryzuje się 
 znacznie niższą wydajnością i~większym zużyciem pamięci RAM oraz Flash 
@@ -336,7 +334,7 @@ niezawodnych systemów wbudowanych~\cite{TheRustProgrammingLanguage}.
 \subsection{Podsumowanie i porównanie cech języków}
 \label{section:lang_compare}
 W~celu uzasadnienia wyboru narzędzi programistycznych w niniejszej pracy, 
-w~tabeli~\ref{tab:porownanie_jezykow} zestawiono kluczowe cechy 
+w~tabeli~\ref{tab:porownanie_jezykow} zestawiono najważniejsze cechy
 omawianych języków programowania.
 
 \begin{table}[h!]
