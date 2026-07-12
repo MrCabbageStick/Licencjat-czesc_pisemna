@@ -1,8 +1,63 @@
 \chapter{Oprogramowanie}
-Rozdział ten ma za zadanie opisać program utworzony na potrzeby
-tego projektu.
+Rozdział ten opisuje oprogramowanie utworzone na potrzeby tego projektu.
+Omówione zostały główne elementy implementacji: obsługa licznika 
+Geigera--Müllera, autorska biblioteka do komunikacji z~prostymi nadajnikami 
+radiowymi oraz obsługa modułów wspomnianych 
+w~podrozdziale~\ref{section:measurement_modules}.
 
 \section{Narzędzia i biblioteki nieautorskie}
+Projekt korzysta z~kilku zewnętrznych bibliotek oraz narzędzi 
+usprawniających programowanie mikrokontrolera w~języku Rust.
+
+\begin{itemize}
+    \item \texttt{avr-hal} --- warstwa abstrakcji sprzętowej
+    (\textit{Hardware Abstraction Layer}) dla mikrokontrolerów z~rodziny AVR,
+    dostarczająca m.in.~implementację \texttt{arduino-hal}, wykorzystywaną
+    do obsługi peryferiów mikrokontrolera ATmega328p (magistrala \isqrc, piny GPIO,
+    liczniki sprzętowe);
+
+    \item \texttt{avr-device} --- biblioteka udostępniająca niskopoziomowy
+    dostęp do rejestrów peryferiów mikrokontrolera ATmega328p, wygenerowana
+    na~podstawie plików opisu peryferiów (SVD);
+
+    \item \texttt{embedded-hal} --- zbiór standardowych, niezależnych od
+    platformy interfejsów (cech) do obsługi popularnych peryferiów
+    (np.~\isqrc, GPIO), umożliwiający pisanie kodu przenośnego pomiędzy
+    różnymi mikrokontrolerami;
+
+    \item \texttt{panic-halt} --- minimalistyczna implementacja procedury
+    obsługi paniki, zatrzymująca wykonywanie programu;
+
+    \item \texttt{ufmt} --- alternatywna dla standardowej biblioteki
+    \texttt{core::fmt} implementacja formatowania tekstu, o~znacznie
+    mniejszym rozmiarze skompilowanego kodu, istotnym w~środowisku
+    \texttt{no\_std};
+
+    \item \texttt{nb} --- biblioteka dostarczająca abstrakcję operacji
+    nieblokujących, wykorzystywaną przez \texttt{embedded-hal} oraz
+    \texttt{avr-hal} do obsługi peryferiów pracujących asynchronicznie.
+\end{itemize}
+
+Do budowania i~wgrywania oprogramowania na~mikrokontroler wykorzystano
+dodatkowo następujące narzędzia:
+
+\begin{itemize}
+    \item \texttt{ravedude} --- narzędzie automatyzujące proces wgrywania
+    skompilowanego programu na~płytkę oraz nawiązujące komunikację
+    z~programatorem, uruchamiane automatycznie po~kompilacji za~pomocą
+    polecenia \texttt{cargo~run} (konfiguracja w~pliku \texttt{Ravedude.toml});
+
+    \item \texttt{avrdude} --- programator wykorzystywany przez
+    \texttt{ravedude} do~komunikacji z~mikrokontrolerem za~pośrednictwem
+    programatora sprzętowego \texttt{usbasp};
+
+    \item niestandardowa (\textit{unstable}) funkcjonalność narzędzia
+    \texttt{cargo} --- \texttt{build-std}, umożliwiająca skompilowanie
+    biblioteki \texttt{core} --- niezależnego od systemu operacyjnego
+    rdzenia biblioteki standardowej Rusta, wykorzystywanego w~środowiskach
+    \texttt{no\_std} --- dla~docelowej architektury \texttt{avr-none},
+    nieobecnej domyślnie w~dystrybucji kompilatora Rust.
+\end{itemize}
 
 \input{src/oprogramowanie/aht20.tex}
 \input{src/oprogramowanie/bmp280.tex}
