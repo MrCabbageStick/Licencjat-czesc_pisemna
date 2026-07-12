@@ -2,8 +2,8 @@
 Moduł BMP280 jest obsługiwany przez strukturę \texttt{Bmp280},
 pokazaną na listingu~\ref{lst:bmp280_struct}. Zawiera ona pole
 adresu urządzenia magistrali \isqrc, pole przechowujące dane
-kompensacyjne pomiarów oraz parametr typu \texttt{CONFIG} zawarty
-w~polu \texttt{PhantomData} o~zerowym rozmiarze w~pamięci.
+kompensacyjne pomiarów oraz parametr typu \texttt{CONFIG} powiązany
+z~polem \texttt{PhantomData} o~zerowym rozmiarze w~pamięci.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Struktura \texttt{Bmp280}},
@@ -20,12 +20,12 @@ pub struct Bmp280<CONFIG>{
 Do poprawnej interpretacji danych modułu BMP280 niezbędne są dane kompensacyjne
 zapisane przez producenta w~pamięci samego modułu.
 Składają sie one z~dwunastu liczb szesnastobitowych (dwie z~nich traktowane są
-jako liczby ze znakiem) zapisanych w formacie \textit{little endian}.
+jako liczby ze znakiem) zapisanych w~formacie \textit{little endian}.
 
 Przechowaniem ich po stronie programu zajmuje się struktura 
 \texttt{Bmp280Compensations}.
-Została ona opatrzona metodą pozwalającą na ich odczyt, przedstawioną na
-listingu~\ref{lst:bmp280compensations_read}.
+Została ona opatrzona metodą pozwalającą na ich odczyt z~modułu, przedstawioną 
+na listingu~\ref{lst:bmp280compensations_read}.
 Metoda odczytuje 24~bajty z~pamięci modułu BMP280 i~przypisuje je do 
 poszczególnych pól struktury. Nazwy pól struktury przyjęto zgodnie z~nazwami
 prezentowanymi w~nocie katalogowej~\cite{bmp280_datasheet}.
@@ -80,7 +80,7 @@ katalogową. Wymagane wartości rejestrów przechowywane są w~stałych
 powstają przez przesunięcie bitowe stałych \texttt{BITS}
 na odpowiednie pozycje i~złożenie ich operatorem alternatywy bitowej.
 Rejestr \texttt{CONFIG\_VALUE} dodatkowo określa protokół komunikacyjny
-urządzenia -- pole \texttt{EN\_SPI} ustawione jest na~0, co wymusza
+urządzenia --- pole \texttt{EN\_SPI} ustawione jest na~0, co wymusza
 użycie protokołu \isqrc.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 

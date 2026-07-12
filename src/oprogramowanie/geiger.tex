@@ -50,16 +50,15 @@ pub fn init(&self){
 \end{lstlisting}
 
 \subsection*{Odczyt licznika}
-Struktura \texttt{GeigerCounter} udostępnia metodę \texttt{tick}
-służącą do odczytania 16--bitowej wartości licznika T1 (z~rejestrów TCNT1L 
-i~TCNT1H), wyzerowania go i~zapisania odczytanej wartości do bufora.
-Bufor traktowany jest jako cykliczny, a początkowo wypełniony jest 
-zerami.
-Docelowo metoda \texttt{tick} powinna być wykonywana co sekundę, aby 
-wypełnienie bufora zajęło jedną minutę.
-Listing \ref{lst:read_geiger_counter} przedstawia metodę \texttt{tick} oraz pomocniczą, 
-nie publiczną metodę \texttt{read\_and\_reset\_timer} służącą do odczytania 
-i~wyzerowania wartości licznika T1.
+Struktura \texttt{GeigerCounter} udostępnia metodę \texttt{tick}, która 
+odczytuje 16-bitową wartość licznika T1 (rejestry TCNT1L i~TCNT1H), 
+zeruje go, a~następnie zapisuje odczytaną wartość do bufora cyklicznego, 
+wypełnionego początkowo zerami.
+Docelowo metoda \texttt{tick} ma być wywoływana co sekundę, dzięki czemu 
+zapełnienie bufora zajmie minutę.
+Listing \ref{lst:read_geiger_counter} przedstawia metodę \texttt{tick} 
+oraz pomocniczą, prywatną metodę \texttt{read\_and\_reset\_timer}, 
+odpowiedzialną za odczyt i~wyzerowanie wartości licznika T1.
 
 \begin{lstlisting}[
     language=Rust, style=colouredRust, 
@@ -96,8 +95,8 @@ fn read_and_reset_timer(&self) -> u16{
 \subsection*{Odczyt zliczeń na minutę}
 Zliczenia na minutę (ang. \textit{counts per minute}, CPM) określają liczbę 
 cząstek zliczonych przez licznik promieniowania w~ciągu minuty.
-Aby uzyskać tą wartość ze struktury \texttt{GeigerCounter} udostępniona została
-metoda \texttt{cpm} pokazana na listingu~\ref{lst:geiger_counter_cpm}.
+Aby uzyskać tą wartość struktura \texttt{GeigerCounter} udostępnia
+metodę \texttt{cpm} pokazaną na listingu~\ref{lst:geiger_counter_cpm}.
 Zwraca ona wartość poprzez ekstrapolację zsumowanych wartości bufora na czas
 pełnej minuty. Podejście to niesie ze sobą dwie konsekwencje: przy czasie pracy 
 krótszym niż minuta wynik obarczony jest błędem, natomiast przy pełnym buforze

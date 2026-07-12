@@ -1,8 +1,9 @@
 \section{Moduł VEML7700}
 Moduł VEML7700 obsługiwany jest przez strukturę \texttt{Veml7700},
-pokazaną na listingu~\ref{lst:veml7700}. Posiada parametr typu 
-\texttt{CONFIG} zawarty w~polu PhantomData o~zerowym rozmiarze w~pamięci 
-oraz pole \texttt{address} przechowujące adres urządzenia magistrali \isqrc.
+pokazaną na listingu~\ref{lst:veml7700}. Struktura ta posiada parametr typu 
+\texttt{CONFIG} związany z~polem typu PhantomData --- strukturą, która nie 
+zajmuje pamięci --- oraz pole \texttt{address} przechowujące adres 
+urządzenia magistrali \isqrc.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Struktura \texttt{Veml7700}},
@@ -16,12 +17,13 @@ pub struct Veml7700<CONFIG>{
 
 \subsection*{Konfiguracja}
 \label{section:veml7700_config}
-Konfiguracja modułu VEML7700 odbywa się poprzez zapis danych do 2
-dwu bajtowych rejestrów o~adresach 0x0 i~0x3.
+Konfiguracja modułu VEML7700 odbywa się poprzez zapis danych do dwóch
+dwubajtowych rejestrów o~adresach 0x0 i~0x3.
 Dodatkowo moduł oferuje możliwość wykrycia przekroczenia konkretnych 
-wartości górnych i~dolnych, po którym nastąpi ustawienie odpowiedniego
-bitu w~pamięci modułu. Do ustawienia tych wartości służą odpowiednio 
-dwu bajtowe rejestry o~adresach 0x1 i~0x2.
+wartości górnych i~dolnych \translation{thresholds}, co skutkuje 
+ustawieniem odpowiedniego bitu w~pamięci modułu. 
+Do ustawienia tych wartości służą odpowiednio 
+dwubajtowe rejestry o~adresach 0x1 i~0x2.
 
 W~celu przedstawienia konfiguracji została utworzona cecha \texttt{Config}
 oraz cechy pomocnicze przedstawione na~listingu \ref{lst:veml7700_config}.
@@ -29,9 +31,8 @@ Głównym zadaniem tej cechy jest określenie wartości rejestrów
 bazując na stałych czasu kompilacji \texttt{BITS} dostępnych w~cechach
 pomocniczych.
 
-Wartości dla rejestrów odpowiedzialnych za ustawianie wartości progowych 
-wynoszą 0 i~nie są zależne od cech pomocniczych. Wynika to z~braku 
-potrzeby używania ich w~tym projekcie.
+Rejestry progowe mają zawsze wartość 0, ponieważ ta 
+funkcjonalność nie jest wykorzystywana w~tym projekcie.
 
 Z~racji wpływu konfiguracji na stałe matematyczne używane przy konwersji
 surowych wartości odczytanych z~modułu, cecha została uzupełniona o~stałe 
@@ -101,12 +102,12 @@ pub trait AlsPsm{ const BITS: u16; }
 \end{lstlisting}
 
 Przykładowa konfiguracja, używana na potrzeby tego projektu, jest pokazana na 
-listingu~\ref{lst:veml7700_config_exmaple}. Dane pochodzą z~noty katalogowej
+listingu~\ref{lst:veml7700_config_example}. Dane pochodzą z~noty katalogowej
 modułu~\cite{veml7700_datasheet}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Przykładowa konfiguracja dla modułu VEML7700},
-    label={lst:veml7700_config_exmaple}
+    label={lst:veml7700_config_example}
 ]
 pub struct ConfigFastLowPower;
 
@@ -116,7 +117,7 @@ impl Config for ConfigFastLowPower{
     type Psm = AlsPsm1;
 
     const LUX_NUM: u32 = 10 * 1000;
-    // Sesitivity of 0.042 scaled scaled by 1000
+    // Sensitivity of 0.042 scaled by 1000
     // and refresh time of 600ms
     const LUX_DEN: u32 = 42 * 600;
 }
@@ -135,7 +136,7 @@ impl AlsPsm for AlsPsm1{ const BITS: u16 = 0b00; }
 Inicjalizacja modułu VEML7700 sprowadza się do wpisania danych
 do 4 rejestrów konfiguracyjnych. W~tym celu implementacja 
 struktury \texttt{Veml7700} posiada stałą czasu kompilacji
-będącą tablicą wartości do jakie powinny przyjąć rejestry.
+będącą tablicą wartości, które powinny przyjąć rejestry.
 Funkcja \texttt{init} iteruje przez te wartości, wpisując 
 je do rejestrów. Pomiędzy każdym zapisem danych występuje
 przerwa co najmniej \SI{10}{\milli\second}. Proces ten został
@@ -184,7 +185,7 @@ $LUX\_DEN$ i~$LUX\_NUM$ zostały opisane w~podrozdziale~\ref{section:veml7700_co
 Implementacja tego wzoru widoczna jest na listingu~\ref{lst:veml7700_conversion}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
-    caption={Konwersja surowych danych modułu VEML7700 na wartośc wyrazoną w~luksach},
+    caption={Konwersja surowych danych modułu VEML7700 na wartość wyrażoną w~luksach},
     label={lst:veml7700_conversion}
 ]
 fn raw_to_lux(raw: u16) -> u32{
@@ -196,7 +197,7 @@ fn raw_to_lux(raw: u16) -> u32{
 Odczyt danych z~modułu polega na odczytaniu wartości rejestru 0x5,
 wewnątrz którego zapisana jest 16--bitowa liczba bez znaku.
 Liczba ta następnie poddawana jest konwersji.
-Metoda realizująca ten proces ten został pokazany na 
+Metoda realizująca ten proces została pokazana na 
 listingu~\ref{lst:veml7700_read}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 

@@ -9,14 +9,14 @@ klasę \texttt{RH\_ASK}.
 
 Ten podrozdział jest poświęcony obsłudze nadajnika radiowego
 (struktura \texttt{Transmitter} biblioteki \texttt{ook\_433mhz})
-i~nie będzie zagłebiał się w~implementacje obsługi odbiornika.
+i~nie będzie zagłębiał się w~implementację obsługi odbiornika.
 
 \subsection{Przebieg transmisji}
 Transmisję danych można podzielić na 3~etapy: synchronizację,
 wysłanie bajtu startu i~wysłanie ramki danych.
-Sygnał synchronizujący składa się z~3~bajtów wypełnionych 
-naprzemiennie bitami o~wartościach~1~i~0 i~służy do 
-przygotowania odbiornika na odczyt danych.
+Sygnał synchronizujący składa się z~3 bajtów wypełnionych naprzemiennie 
+bitami o~wartościach 1 i~0. Służy on do przygotowania odbiornika na 
+odczyt danych.
 Bajt startu (zdefiniowany w~bibliotece stałą \texttt{START\_BYTE})
 przyjmuje formę liczby o~zapisie binarnym \texttt{11001100}.
 Struktura ramki obejmuje pole długości, zawierające informację 
@@ -26,13 +26,13 @@ dane właściwe.
 Dane transmitowane są poczynając od najmłodszego bitu każdego bajtu.
 Same bity podzielone są na próbki (nazywane w~programie angielskim słowem 
 \textit{tick}) używane do sterowania linią danych nadajnika radiowego.
-Każda próbka przyjmuje wartość 0~lub~1, identyczną co wartości bitu, który 
+Każda próbka przyjmuje wartość 0~lub~1, identyczną z~wartością bitu, który 
 buduje.
 
 \subsection{Maszyna stanów}
 Struktura \texttt{Transmitter} posiada pole \texttt{state} określające obecny 
 stan nadajnika, wybrany spośród pięciu wartości opisanych w~typie wyliczeniowym
-\texttt{TxState} i~są to:
+\texttt{TxState}:
 \begin{enumerate}
     \item \textbf{\texttt{Idle}} --- stan ustawiany jako domyślny i~osiągany
     w~momencie zakończenia transmisji.
@@ -45,7 +45,7 @@ stan nadajnika, wybrany spośród pięciu wartości opisanych w~typie wyliczenio
     wymaganych bajtów synchronizacyjnych, w~którym nadajnik wysyła bajt startu.
     
     \item \textbf{\texttt{SendingData}} --- stan, w~którym nadajnik wysyła
-    zawartość buforu, osiągany po wysłaniu bajtu startu.
+    zawartość bufora, osiągany po wysłaniu bajtu startu.
     
     \item \textbf{\texttt{DataSent}} --- stan osiągany po wysłaniu całej zawartości
     bufora.
@@ -56,18 +56,17 @@ Struktura \texttt{Transmitter}, pokazana na listingu~\ref{lst:transmitter_struct
 przechowuje informacje niezbędne do prawidłowego nadania danych i~określenia
 obecnego stanu nadajnika.
 
-Głównym zadaniem pól \texttt{bit\_index} oraz \texttt{byte\_index} jest okreslenie,
+Głównym zadaniem pól \texttt{bit\_index} oraz \texttt{byte\_index} jest określenie,
 który bajt i~zawarty w~nim bit powinien być w~danym momencie wysyłany.
 
 Pole \texttt{buffer} przechowuje zakodowane dane przeznaczone do wysłania.
 Jego wielkość ograniczona jest przez stałą czasu kompilacji 
-\texttt{MAX\_BUFFER\_SIZE}. Bufor inicjalizowany jest wartościami zerowymi
-i~nie następuje jego czyszczenie podczas pracy nadajnika, jest on jedynie
-nadpisywany nowymi wartościami, których długość określa pole 
-\texttt{message\_bit\_length}. 
+\texttt{MAX\_BUFFER\_SIZE}. Bufor inicjalizowany jest wartościami zerowymi. 
+Podczas pracy nadajnika nie jest on czyszczony —-- jedynie nadpisywany nowymi 
+wartościami, których długość określa pole \texttt{message\_bit\_length}.
 
 Struktura posiada również parametr typu generycznego \texttt{TICKS\_PER\_BIT}
-określający ilość próbek potrzebnych na przesłanie jednego bitu. Parametr ten
+określający liczbę próbek potrzebnych na przesłanie jednego bitu. Parametr ten
 określany jest w~czasie kompilacji.
 
 \begin{lstlisting}[
@@ -94,7 +93,7 @@ jest odpowiadająca jej 6--bitowa grupa kodowa (spośród 64 możliwych kombinac
 Dodanie dwóch nadmiarowych bitów pozwala na taki dobór sekwencji wyjściowych, 
 aby spełniały one dwa warunki: ograniczały maksymalną liczbę kolejnych jedynek 
 i~zer w~strumieniu (tzw. kodowanie RLL, ang. \textit{run-length limited}) oraz 
-zapewniały zbalansowany ich udział \translation{DC balance}. 
+zapewniały ich zbalansowany udział \translation{DC balance}. 
 Dzięki temu przesyłany sygnał zawiera regularne przejścia między stanami,
 co ułatwia odbiornikowi odtworzenie zegara transmisji \translation{clock recovery}
 bezpośrednio z~odbieranego sygnału, bez potrzeby przesyłania osobnego sygnału 
@@ -102,25 +101,24 @@ taktującego.
 
 Za przygotowanie danych do nadania odpowiada metoda \texttt{send} struktury
 \texttt{Transmitter}, przedstawiona na listingu~\ref{lst:transmitter_send}. 
-Sprawdza ona czy bajty wysyłanej wiadomość, po zakodowaniu, zmieszczą się 
+Sprawdza ona czy bajty wysyłanej wiadomości, po zakodowaniu, zmieszczą się 
 w~buforze. W~przypadku, gdy wiadomość jest zbyt długa, zostaje ona przycięta
 do maksymalnej możliwej długości (określonej stałą \texttt{MAX\_MESSAGE\_LENGTH}).
 Następnie jako pierwszy bajt bufora zapisywany jest rozmiar wiadomości w~bajtach
-przed kodowaniem, kolejne bajty bufora uzupełnione są zawartością wiadomości.
+przed kodowaniem, a~kolejne bajty bufora uzupełnione są zawartością wiadomości.
 Tak przygotowany bufor zawsze będzie przynajmniej w~połowie niewykorzystany,
 co pozwala na zakodowanie jego zawartości metodą \texttt{encode\_in\_place} modułu
-\texttt{data\_coding::radio\_head\_4b6b}
-Ilość bitów zakodowanej ramki, gotowej do wysłania przez nadajnik,
-określa się sumując ilość bajtów niezakodowanej wiadomości z~ilością
-bajtów kodujących jej rozmiar, następnie mnożąc tą wartością przez 
-stałą określającą narzut pochodzący z~kodowania zapisaną jako ilość bitów na bajt. 
-Funkcja zwraca informację o~ilości bajtów zapisanych do bufora
-w~celu umożliwienia wysłania większej ilości danych dzieląc je na 
-wysyłane oddzielnie fragmenty.
+\texttt{data\_coding::radio\_head\_4b6b}.
+Liczba bitów zakodowanej ramki, gotowej do wysłania przez nadajnik,
+określa się sumując liczba bajtów niezakodowanej wiadomości z~ilością
+bajtów kodujących jej rozmiar. Otrzymaną wartość mnoży się następnie przez stałą 
+określającą narzut kodowania, wyrażoną jako liczba bitów na bajt.
+Funkcja zwraca liczbę bajtów zapisanych do bufora, co pozwala przesyłać większe 
+porcje danych podzielone na osobno wysyłane fragmenty.
 
 \begin{lstlisting}[
     language=Rust, style=colouredRust, 
-    caption={Metode \texttt{send} struktury \texttt{Transmitter}},
+    caption={Metoda \texttt{send} struktury \texttt{Transmitter}},
     label={lst:transmitter_send}
 ]
 pub fn send(&mut self, bytes: &[u8]) -> Option<usize> {
