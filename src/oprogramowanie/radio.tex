@@ -101,14 +101,46 @@ bezpośrednio z~odbieranego sygnału, bez potrzeby przesyłania osobnego sygnał
 taktującego.
 
 Za przygotowanie danych dla nadajnika odpowiada metoda \texttt{send} struktury
-\texttt{Transmitter}, przedstawiona na listingu~\ref{}. 
+\texttt{Transmitter}, przedstawiona na listingu~\ref{lst:transmitter_send}. 
 Sprawdza ona czy bajty wysyłanej wiadomość, po zakodowaniu, zmieszczą się 
 w~buforze. W~przypadku, gdy wiadomość jest zbyt długa, zostaje ona przycięta
 do maksymalnej możliwej długości (określonej stałą \texttt{MAX\_MESSAGE\_LENGTH}).
 Następnie jako pierwszy bajt bufora zapisywany jest rozmiar wiadomości w~bajtach
 przed kodowaniem, kolejne bajty bufora uzupełnione są zawartością wiadomości.
 Tak przygotowany bufor zawsze będzie przynajmniej w~połowie niewykorzystany,
-co pozwala na zakodowanie jego zawartości metodą \texttt{encode\_in\_place} modułu
-\texttt{data\_coding::radio\_head\_4b6b}
-Metoda określa ilość bajtów ramki jaką nadajnik musi wysłać
+co pozwala na zakodowanie jego zawartości metodą \texttt{encode\_in\_place} 
+modułu \texttt{data\_coding::radio\_head\_4b6b}.
+Metoda określa ilość bitów zakodowanej ramki jako i~zapisuje ją w~polu
+\texttt{message\_bit\_length}, używanym podczas wysyłania danych.
 Funkcja zwraca informację o~ilości użytych bajtów.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Metoda \texttt{send} struktury \texttt{Transmitter}},
+    label={lst:transmitter_send}
+]
+pub fn send(&mut self, bytes: &[u8]) -> Option<usize> {
+    let n_bytes = if bytes.len() > MAX_MESSAGE_LENGTH {
+        MAX_MESSAGE_LENGTH
+    } else {
+        bytes.len()
+    };
+
+    // Set message length as first byte
+    self.buffer[0] = n_bytes as u8;
+    // Populate buffer
+    self.buffer[1..=n_bytes].copy_from_slice(&bytes[0..n_bytes]);
+    // (message size + byte for length) * encoded nibble size 
+    // * nibbles per byte
+    self.message_bit_length = (n_bytes + 1) * 6 * 2;
+
+    // Encode data
+    match encode_in_place(&mut self.buffer, n_bytes + 1) {
+        Ok(_) => {
+            self.state = TxState::Syncing;
+            Some(n_bytes)
+        }
+        Err(_) => None,
+    }
+}
+\end{lstlisting}
