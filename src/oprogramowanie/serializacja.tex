@@ -66,3 +66,68 @@ pub struct TypedLabelReadout<ID, SCALE, TYPE>{
     _label: PhantomData<(ID, SCALE, TYPE)>,
 }
 \end{lstlisting}
+
+Implementacja struktury zawęża te parametry do określonych typów,
+widocznych na listingu \ref{lst:typed_label_readout_impl}.
+Typy te posiadają w~swojej implementacji skojarzone stałe
+\texttt{BITS} będące częściami bajtu informacji o~pomiarze.
+Przy pomocy stałych opisujących przesunięcia i~maski, dla
+każdej z~informacji, utworzona jest stała \texttt{LABEL}.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Implemetacja strktury \texttt{TypedLabelReadout}},
+    label={lst:typed_label_readout_impl}
+]
+impl<ID: SensorId, SCALE: UnitScale, TYPE: SensorType> TypedLabelReadout<ID, SCALE, TYPE> {
+    const LABEL: u8 = 
+        (ID::BITS << SENSOR_ID_OFFSET) & SENSOR_ID_MASK
+        | (SCALE::BITS << UNIT_SCALE_OFFSET) & UNIT_SCALE_MASK
+        | (TYPE::BITS << SENSOR_TYPE_OFFSET) & SENSOR_TYPE_MASK;
+    
+    // [...]
+}
+\end{lstlisting}
+
+Aby umożliwić tworzenie innych struktur mogących reprezentować
+dane pomiarowe utworzono cechę \texttt{LabeledReadout},
+pokazaną na listingu~\ref{lst:labeled_readout_trait}.
+Definiuje ona trzy metody pozwalające na uzyskanie
+danych odnośnie pomiaru:
+\begin{itemize}
+    \item \texttt{get\_label} --- informacje dotyczące pomiaru,
+    \item \texttt{get\_data} --- dane pomiarowe,
+    \item \texttt{get\_bytes} --- dane wraz z~informacjami 
+    w~postaci tablicy bajtów.
+\end{itemize}
+
+Cecha posiada wewnętrzny typ \texttt{Data} określający 
+jakiego typu dane znajdują się w~jej implementacji. 
+Z~tego względu implementacja posiada również stały
+parametr \texttt{N\_BYTES} określający ilość bajtów
+zwracanych przez metodę \texttt{get\_bytes}, której
+wartość definiowana jest jako ilość bajtów typu
+danych zsumowana z~ilością bajtów potrzebnych
+na zakodowanie informacji o~pomiarze.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Transmitter}},
+    label={lst:labeled_readout_trait}
+]
+pub trait LabeledReadout<const N_BYTES: usize>{
+    type Data;
+
+    fn get_label(&self) -> u8;
+    fn get_data(&self) -> Self::Data;
+    fn get_bytes(&self) -> [u8; N_BYTES];
+}
+\end{lstlisting}
+
+Cecha \texttt{LabeledReadout} została zaimplementowana 
+dla struktury \texttt{TypedLabelReadout}. Dodatkowo 
+utworzono strukturę \texttt{DynamicLabeledReadout}
+udostępniającą metodę \texttt{from\_bytes} konstruującą
+obiekt z~bajtów. Struktura ta nie została zastosowana
+w~samym projekcie, ale okazała sie przydatna podczas
+konstrukcji odbiornika.
