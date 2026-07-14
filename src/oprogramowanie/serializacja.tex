@@ -1,1 +1,68 @@
 \section{Serializacja danych}
+Aby przesłać dane za pomocą sygnału cyfrowego,
+niezbędne jest przekształcenie ich na zapis bitowy.
+
+
+\subsection*{Dane pomiarowe}
+Do interpretacji danych pomiarowych niezbędne są 3~informacje:
+\begin{itemize}
+    \item \textbf{typ danych} (SENSOR TYPE) --- z~jakiego typu urządzenia
+    pomiarowego pochodzą dane (np. termometr, barometr itp.)
+    \item \textbf{numer urządzenia pomiarowego} (ID) --- czujnik 
+    klimatyczny może posiadać wiele modułów pomiarowych
+    tego samego typu.
+    \item \textbf{rozdzielczość danych} (SCALE) --- ilość liczb po
+    po przecinku zawartych w~pomiarze.
+\end{itemize}
+Ze względu na chęć zachowania jak najmniejszego rozmiaru,
+informacje te znajdą się w~jednym bajcie poprzedzającym 
+samą odczytaną wartość. Bajt ten posiada następującą
+strukturę:
+
+\bigskip
+
+\begin{bytefield}[bitwidth=4.4em,endianness=big]{8}
+    \bitheader{0,3,4,5,6,7} \\
+    \bitbox{2}{ID}
+    \bitbox{2}{SCALE}
+    \bitbox{4}{SENSOR TYPE}
+\end{bytefield}
+
+Wartość pomiaru zapisywana jest jako 32~bitowa liczba bez 
+znaku. W~przypadku danych, w~których występują liczby
+ujemne (np. temperatura), konieczna jest konwersja na liczbę
+bez znaku podczas jej serializacji i~następnie konwersja
+na liczbę ze znakiem przy deserializacji.
+Typ ten został wybrany z~powodu możliwości zapisania
+w~nim danych z~każdego obsługiwanego w~projekcie modułu.
+
+Całość wartości pomiarowej wraz z~danymi ją opisującymi 
+ma rozmiar 5 bajtów i~strukturę:
+
+\bigskip
+
+\begin{bytefield}[endianness=little,bitwidth=0.8em]{40}
+    \bitheader{0,7,8,39} \\
+    \bitbox{8}{LABEL \\ \tiny 1 byte} 
+    \bitbox{32}{DATA \\ \tiny 4 bytes}
+\end{bytefield}
+
+\subsection*{Serializacja w kodzie}
+Za serializację danych pomiarowych odpowiedzialna 
+jest struktura \texttt{TypedLabelReadout}, przedstawiona na 
+listingu~\ref{lst:typed_lebel_readout}.
+Posiada ona ona czterobajtowe pole danych typu \texttt{u32} 
+oraz trzy parametry generyczne \texttt{ID}, \texttt{SCALE}
+i~\texttt{TYPE}, odpowiedzialne odpowiednio za: numer urządzenia
+pomiarowego, rozdzielczość danych i~typ urządzenia pomiarowego.
+
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Transmitter}},
+    label={lst:typed_lebel_readout}
+]
+pub struct TypedLabelReadout<ID, SCALE, TYPE>{
+    data: u32,
+    _label: PhantomData<(ID, SCALE, TYPE)>,
+}
+\end{lstlisting}
