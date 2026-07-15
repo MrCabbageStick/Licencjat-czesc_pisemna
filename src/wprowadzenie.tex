@@ -1,4 +1,4 @@
-\chapter{Wprowadzenie}
+\chapter{Czujniki klimatyczne}
 Rozdział pierwszy wprowadza w~tematykę pracy, przedstawiając kontekst 
 zastosowania czujników klimatycznych we współczesnej inżynierii oraz 
 uzasadniając dobór komponentów pomiarowych i~energetycznych 
@@ -9,7 +9,7 @@ z~zasilaniem urządzeń zewnętrznych ze źródeł fotowoltaicznych,
 w~tym porównanie ogniw litowo-jonowych z~superkondensatorami jako 
 magazynów energii.
 
-\section{Czujniki klimatyczne}
+% \section{Czujniki klimatyczne}
 Współczesny rozwój technologiczny w~połączeniu z~postępującymi
 zamianami klimatu oraz rosnącą automatyzacją procesów 
 przemysłowych i~urządzeń domowych sprawiły, że precyzyjne
@@ -323,8 +323,9 @@ w~czasie wykonywania programu oraz bez użycia mechanizmu
 \textit{Garbage Collector}.
 
 Dodatkowo, ekosystem języka Rust oferuje zaawansowane narzędzia menedżera 
-pakietów \textbf{cargo}, co ułatwia zarządzanie zależnościami oraz 
-automatyzację testów. Choć próg wejścia~w ten język jest wysoki ze 
+pakietów \textbf{cargo}, co ułatwia zarządzanie zależnościami, instalowanie
+bibliotek oraz automatyzację testów. 
+Choć próg wejścia~w ten język jest wysoki ze 
 względu na restrykcyjny kompilator oraz niestandardowe podejście do 
 zarządzania pamięcią, bezpieczeństwo kodu i~odporność 
 na błędy współbieżności \translation{data races} sprawiają, 
@@ -354,42 +355,44 @@ Determinizm czasowy & Tak & Tak (z ograniczeniami) & Nie & Tak \\ \bottomrule
 }
 \end{table}
 
-\chapter{Wybrane rozwiązania projektowe}
+\chapter{Realizacja projektu czujników klimatycznych}
 Zadaniem tego rozdziału jest opisanie rozwiązań wybranych do realizacji
 części praktycznej licencjatu.
 
 \section{Założenia projektowe}
 Projekt od początku powstawał z myślą zaprojektowania czujników klimatycznych 
-do zastosowań zewnętrznych. Takie podejście podyktowało pewne założenia,
-które gotowy projekt musi spełnić. Głównymi z nich są:
+do zastosowań wewnętrznych jak i~zewnętrznych. Takie podejście podyktowało 
+pewne założenia, które gotowy projekt musi spełnić. Głównymi z nich są:
 \begin{itemize}
-    \item \textbf{Komunikacja radiowa} --- czujnik nie powinien 
-    wymagać przewodowego połączenia ze stacją bazową. Najlepszym rozwiązaniem
-    tego problemu było zastosowanie krótkodystansowej komunikacji radiowej.
-    \item \textbf{Zastosowanie paneli fotowoltaicznych} --- czujnik powinien
+    \item \textbf{Komunikacja bezprzewodowa} --- czujnik nie powinien 
+    wymagać przewodowego połączenia ze stacją bazową.
+    \item \textbf{Własne źródło energii} --- czujnik powinien
     posiadać własne źródło zasilania, aby jak najbardziej zredukować czas
     potrzebny na konserwację czujnika.
-    \item \textbf{Zastosowanie superkondensatorów} --- czujnik powinien być 
+    \item \textbf{Magazyn energii} --- czujnik powinien być 
     w~stanie dokonywać pomiarów nawet w~czasie braku dostępu do energii 
-    pochodzącej ze źródła zasilania. Wybór superkondensatorów został 
-    uzasadniony w podrozdziale \ref{section:powering_climate_sensors}.
+    pochodzącej ze źródła zasilania.
     \item \textbf{Niski pobór mocy} --- czujnik powinien potrzebować niewielkich
-    ilości energii do pracy, aby przedłużyć czas operowania na energii 
-    zmagazynowanej w~superkondensatorach i~pozwolić im na szybsze ładowanie
-    energią z paneli fotowoltaicznych.
+    ilości energii do pracy, aby przedłużyć czas operowania na zmagazynowanej
+    energii i~pozwolić na szybsze jego ładowanie.
+    \item \textbf{Akwizycja podstawowych danych} --- czujnik powinien zbierać
+    podstawowe dane klimatyczne, takie jak: temperatura, wilgotność i~ciśnienie.
+    \item \textbf{Rozszerzalność} --- czujnik powinien umożliwiać rozszerzenie
+    o~dodatkowe moduły pomiarowe.
 \end{itemize} 
 
 
 \section{Moduły pomiarowe}
 \label{section:measurement_modules}
-Wybrane moduły pomiarowe obejmują wcześniej wspomniane AHT20, MBP280 
-oraz VEML7700. Funkcjonalnie moduły te wzajemnie się uzupełniają: 
-AHT20 realizuje pomiar temperatury i~wilgotności względnej, BMP280 
-dostarcza danych o~ciśnieniu atmosferycznym, natomiast VEML7700 
-rozszerza zestaw pomiarowy o~natężenie oświetlenia widzialnego.
+W~celu akwizycji podstawowych danych wybrano wspomniane wcześniej, 
+uzupełniające się moduły pomiarowe AHT20 --- odpowiedzialny za 
+pomiar temperatury i~wilgotności --- oraz MBP280 --- mierzący ciśnienie.
+Dodatkowo użyto modułu VEML7700 rozszerzający zestaw pomiarowy 
+o~natężenie światła. 
 Wszystkie komunikują się protokołem \isqrc{} co ułatwia zaprojektowanie
 połączeń z~mikrokontrolerem --- wymagają one jedynie wspólnej magistrali 
-dwuprzewodowej.
+dwuprzewodowej --- oraz pozwala na łatwe rozszerzenie układu o~dodatkowe
+moduły pomiarowe używające tej magistrali.
 Dodatkowym kryterium doboru była dostępność 
 szczegółowej dokumentacji technicznej w~postaci kart katalogowych 
 producenta, umożliwiającej samodzielną implementację sterowników 
@@ -398,10 +401,11 @@ Projekt został wyposażony również w~licznik Geigera-Müllera w~celu
 ostrzegania przed zwiększonym poziomem promieniowania.
 
 \section{Zasilanie}
-Jako jedyne źródło zasilania dla czujników klimatycznych wybrano 
-panele fotowoltaiczne, a~w~celu zapewnienia nieprzerwanej pracy 
+Aby spełniać założenie o~własnym źródle energii,
+wybrano panele fotowoltaiczne, a~w~celu zapewnienia nieprzerwanej pracy 
 czujniki zostały wyposażone w~superkondensatory i~układ 
-zabezpieczający je przed przeładowaniem.
+zabezpieczający je przed przeładowaniem. Wybór superkondensatorów
+został uzasadniony w~podrozdziale~\ref{section:powering_climate_sensors}.
 
 \section{Mikrokontroler}
 Ze względu na wysoką integrację, niski koszt 
@@ -417,6 +421,11 @@ pobór mocy, możliwość uśpienia oraz wbudowane konwertery
 analogowo-cyfrowe\cite{ATmega328p}.
 Posiada on również sprzętowe wsparcie dla protokołu \isqrc{} oraz 
 3~wbudowane liczniki \translation{Timer / Counter}.
+
+\section{Komunikacja radiowa}
+Aby zapewnić bezprzewodową komunikację modułu ze stacją bazową
+zdecydowano sie na wybór tanich modułów radiowych, posługujących
+sie pasmem \SI{433}{\mega\hertz}.
 
 \section{Oprogramowanie}
 Z~porównania języków programowania przedstawionego 
