@@ -1,7 +1,8 @@
 \section{Moduł VEML7700}
-Moduł VEML7700 obsługiwany jest przez strukturę \texttt{Veml7700},
-pokazaną na listingu~\ref{lst:veml7700}. Struktura ta posiada parametr typu 
-\texttt{CONFIG} związany z~polem typu PhantomData --- strukturą, która nie 
+Moduł VEML7700 --- mierzący natężenie światła --- obsługiwany jest przez 
+strukturę \texttt{Veml7700}, pokazaną na listingu~\ref{lst:veml7700}. 
+Struktura ta posiada parametr typu 
+\texttt{CONFIG} związany z~polem typu \texttt{PhantomData} --- strukturą, która nie 
 zajmuje pamięci --- oraz pole \texttt{address} przechowujące adres 
 urządzenia magistrali \isqrc.
 
@@ -180,16 +181,30 @@ impl<CONFIG: Config> Veml7700<CONFIG>{
 \subsection*{Konwersja danych}
 Wzór matematyczny służący do konwersji surowych danych pobranych z~modułu na 
 wartość wyrażoną w~luksach znajduje się w~nocie katalogowej~\cite{veml7700_datasheet}.
-Na potrzeby kodu został on przekształcony na $lux = \frac{raw \cdot LUX\_NUM}{LUX\_DEN}$.
-$LUX\_DEN$ i~$LUX\_NUM$ zostały opisane w~podrozdziale~\ref{section:veml7700_config}.
-Implementacja tego wzoru widoczna jest na listingu~\ref{lst:veml7700_conversion}.
+Na potrzeby kodu został on przekształcony na:
+\begin{equation}
+    lux = \frac{raw \cdot LUX\_NUM \cdot ACCURACY}{LUX\_DEN},
+\end{equation}
+\noindent gdzie 
+\begin{itemize}
+    \item $LUX\_DEN$ i~$LUX\_NUM$ --- zostały opisane w~podrozdziale~\ref{section:veml7700_config};
+    \item $ACCURACY$ --- pozwala na skalowanie wyniku w~celu uniknięcia
+    utraty dokładności, wynikającej z~użycia arytmetyki całkowitoliczbowej.
+\end{itemize}
+
+Implementacja tego wzoru widoczna jest na listingu~\ref{lst:veml7700_conversion}, gdzie
+parametr \texttt{ACCURACY} jest stałym parametrem czasu kompilacji. Warto zaznaczyć
+również rozszerzenie typu do 64--bitowej liczby całkowitej, jest to konieczne
+aby uniknąć przepełnienia liczby 32--bitowej, ale wiążę się to z~obniżeniem
+wydajności kodu.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, 
     caption={Konwersja surowych danych modułu VEML7700 na wartość wyrażoną w~luksach},
     label={lst:veml7700_conversion}
 ]
-fn raw_to_lux(raw: u16) -> u32{
-    (raw as u32 * Self::LUX_NUM) / Self::LUX_DEN
+fn raw_to_lux<const ACCURACY: u32>(raw: u16) -> u32{
+    ((raw as u64 * Self::LUX_NUM as u64) 
+    * ACCURACY as u64 / Self::LUX_DEN as u64) as u32
 }
 \end{lstlisting}
 

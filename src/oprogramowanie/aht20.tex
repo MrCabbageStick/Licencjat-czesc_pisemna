@@ -1,10 +1,24 @@
 \section{Moduł AHT20}
-Za obsługę modułu AHT20 odpowiedzialna jest struktura \texttt{Aht20}.
-Komunikacja realizowana jest za pośrednictwem magistrali \isqrc{} poprzez 
-wysyłanie dedykowanych komend sterujących. 
-Moduł nie wymaga przesyłania danych konfiguracyjnych w~trakcie działania. 
+Za obsługę modułu AHT20 --- mierzącego temperaturę i~wilgotność względną 
+--- odpowiedzialna jest struktura \texttt{Aht20}, przedstawiona na 
+listingu~\ref{lst:aht20_struct}. Przechowuje ona jedynie ośmiobitowy
+adres magistrali \isqrc{}.
 
-Zgodnie z notą katalogową producenta \cite{AHT20} urządzenie obsługuje 
+\begin{lstlisting}[
+    language=Rust, style=colouredRust, 
+    caption={Struktura \texttt{Transmitter}},
+    label={lst:aht20_struct}
+]
+pub struct Aht20 {
+    address: u8,
+}
+\end{lstlisting}
+
+Komunikacja realizowana jest za pośrednictwem magistrali \isqrc{} poprzez 
+wysyłanie dedykowanych komend sterujących, będących sekwencjami
+ośmiobitowych liczb. 
+Moduł nie wymaga przesyłania danych konfiguracyjnych w~trakcie działania. 
+Zgodnie z~notą katalogową producenta \cite{AHT20} urządzenie obsługuje 
 następujący zestaw komend:
 \begin{itemize}
     \item \textbf{Inicjalizacja} --- wymuszenie procedury kalibracji 
@@ -19,13 +33,21 @@ następujący zestaw komend:
 
 \subsection*{Inicjalizacja}
 Procedura inicjalizacji modułu, przedstawiona na listingu~\ref*{lst:aht20_init},
-rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second}, 
+rozpoczyna się od odczekania czasu rozruchu wynoszącego \SI{40}{\milli\second},
+zawartego w~nocie katalogowej, 
 po którym następuje odczyt rejestru statusu. 
-W przypadku braku flagi kalibracji wysyłana jest komenda inicjalizacji, 
-a~następnie wprowadzane jest opóźnienie \SI{10}{\milli\second} niezbędne do 
-jej wykonania.
+W przypadku, gdy bit kalibracji urządzenia  --- zawarty w~zwróconym przez 
+urządzenie bajcie statusu --- wynosi \texttt{0},
+wysyłana jest komenda inicjalizacji, a~następnie, zgodnie z~zaleceniami 
+producenta, wprowadzane jest opóźnienie 
+\SI{10}{\milli\second} niezbędne do jej wykonania.
 
-\begin{lstlisting}[language=Rust, style=colouredRust, caption={Inicjalizacja modułu AHT20}, label={lst:aht20_init}]
+\begin{lstlisting}[
+    language=Rust, 
+    style=colouredRust, 
+    caption={Inicjalizacja modułu AHT20}, 
+    label={lst:aht20_init}
+]
 pub fn init<D: DelayNs>(
     &self, i2c: &mut I2c, 
     delay: &mut D
@@ -44,8 +66,11 @@ pub fn init<D: DelayNs>(
 \end{lstlisting}
 
 \subsection*{Odczyt danych}
+Surowe dane pochodzące z~modułu składają sie z~7~bajtów.
+Pierwsze sześć bajtów zawiera dwie 20--bitowe liczby wartości pomiaru
+wilgotności i~temperatury, po których występuje jeden bajt sumy kontrolnej.
 Odczyt surowych danych pomiarowych, przedstawiony na 
-listingu~\ref{lst:aht20_read_raw}, realizowany jest w trzech etapach. 
+listingu~\ref{lst:aht20_read_raw}, realizowany jest w~trzech etapach. 
 W~pierwszym kroku wysyłana jest komenda wyzwolenia pomiaru, po której, 
 zgodnie z~wymaganiami noty katalogowej, następuje odczekanie 
 \SI{80}{\milli\second} do czasu jego zakończenia. 
@@ -53,7 +78,7 @@ Następnie odczytywany jest rejestr statusu w~celu weryfikacji gotowości układ
 jeżeli bit zajętości jest ustawiony, funkcja zwraca błąd 
 \texttt{Aht20Error::SensorBusy}. 
 W~przypadku pomyślnej weryfikacji dane pomiarowe zostają zaczytane do 
-7-bajtowego bufora i~zwrócone w postaci struktury \texttt{Aht20RawData}.
+7-bajtowego bufora i~zwrócone w~postaci struktury \texttt{Aht20RawData}.
 
 \begin{lstlisting}[language=Rust, style=colouredRust, caption={Odczyt surowych danych z modułu AHT20},
                    label={lst:aht20_read_raw}]
@@ -162,8 +187,8 @@ fn check_crc(bytes: &[u8; 7]) -> bool {
 Implementacja struktury \texttt{Aht20} została uzupełniona o~funkcję 
 \texttt{read} --- przedstawioną na listingu~\ref{lst:aht20_read} --- wykonującą 
 surowy pomiar, weryfikację integralności danych oraz ich konwersję. 
-Surowe wartości temperatury i~wilgotności są 20-bitowymi liczbami całkowitymi 
-bez znaku, które przed przetwarzaniem zostają rozszerzone do typu 
+Surowe wartości temperatury i~wilgotności --- będące 20-bitowymi liczbami całkowitymi 
+bez znaku --- przed przetwarzaniem zostają rozszerzone do typu 
 \texttt{i64}. Wybór tego typu podyktowany jest koniecznością uniknięcia 
 przepełnienia podczas pośrednich operacji arytmetycznych. 
 Należy zaznaczyć, że typ \texttt{i64} nie jest natywnie wspierany przez 

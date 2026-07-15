@@ -1,5 +1,6 @@
 \section{Moduł BMP280}
-Moduł BMP280 jest obsługiwany przez strukturę \texttt{Bmp280},
+Moduł BMP280 --- odpowiedzialny za pomiar ciśnienia
+i~temperatury --- jest obsługiwany przez strukturę \texttt{Bmp280},
 pokazaną na listingu~\ref{lst:bmp280_struct}. Zawiera ona pole
 adresu urządzenia magistrali \isqrc, pole przechowujące dane
 kompensacyjne pomiarów oraz parametr typu \texttt{CONFIG} powiązany
@@ -222,7 +223,7 @@ pub fn read_raw(&self, i2c: &mut I2c)
 \subsection*{Konwersja danych}
 Proces konwersji surowych wartości ciśnienia i~temperatury na wartości 
 rzeczywiste jest dokładnie opisany w~nocie katalogowej 
-BMP280~\cite{bmp280_datasheet}, gdzie podano funkcję zapisane w~języku C. 
+BMP280~\cite{bmp280_datasheet}, gdzie podano funkcje zapisane w~języku C. 
 Funkcje konwersji napisane na potrzeby tej pracy są ich odzwierciedleniem
 w~języku Rust.
 Warto jednak zaznaczyć, że funkcja \texttt{convert\_raw\_temp} odpowiedzialna
