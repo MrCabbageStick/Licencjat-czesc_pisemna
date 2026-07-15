@@ -1,0 +1,28 @@
+\section{Sterowanie zasilaniem}
+Struktura \texttt{PowerManager} odpowiada za sterowanie zasilaniem 
+peryferiów o~podwyższonym poborze prądu (moduł RF, licznik 
+Geigera, magistrala I2C), poprzez niezależne przełączanie 
+odpowiadających im pinów cyfrowych skonfigurowanych jako 
+wyjścia. Typy pinów są parametrami generycznymi, co pozwala 
+uniknąć narzutu dynamicznego dyspozytora przy jednoczesnym 
+zachowaniu elastyczności konfiguracji sprzętowej.
+
+Istotnym elementem implementacji jest obsługa flagi \texttt{active\_low}, 
+uwzględniającej fakt, że w~zależności od zastosowanego 
+układu sterującego zasilaniem (np. tranzystora), stan 
+aktywny modułu może odpowiadać zarówno stanowi wysokiemu, 
+jak i~niskiemu na pinie sterującym. Dzięki zastosowaniu operacji 
+XOR (\texttt{\^}) pomiędzy pożądanym stanem logicznym a~wartością tej 
+flagi, interfejs udostępniany przez metody \texttt{activate\_*}/\texttt{deactivate\_* }
+pozostaje niezależny od szczegółów elektrycznych konkretnego 
+rozwiązania sprzętowego.
+
+Funkcjonalność została podzielona na dwa poziomy granularności: 
+metody \texttt{activate\_power\_hungry}/\texttt{deactivate\_power\_hungry} sterują 
+wyłącznie modułem RF, którego pobór prądu jest na tyle duży, 
+że wymaga on osobnej, częstszej kontroli niezależnie od 
+pozostałych czujników, natomiast metody 
+\texttt{activate\_all}/\texttt{deactivate\_all} zbiorczo przełączają wszystkie 
+zarządzane piny za pośrednictwem prywatnej metody pomocniczej 
+\texttt{set\_all\_state}, co pozwala na jednoczesne, całkowite odcięcie 
+zasilania peryferiów.

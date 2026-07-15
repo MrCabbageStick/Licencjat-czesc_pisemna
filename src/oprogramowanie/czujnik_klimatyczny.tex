@@ -1,0 +1,36 @@
+\section{Czujnik klimatyczny}
+Centralnym elementem warstwy odpowiedzialnej za pomiary środowiskowe 
+jest struktura \texttt{ClimateSensor}, której zadaniem jest agregacja 
+trzech niezależnych modułów pomiarowych — czujnika temperatury 
+i~wilgotności AHT20, czujnika ciśnienia i~temperatury BMP280 oraz 
+czujnika natężenia oświetlenia VEML7700 — pod wspólnym, 
+jednolitym interfejsem. 
+Struktura ta hermetyzuje nie tylko same sterowniki poszczególnych 
+czujników, lecz również współdzieloną magistralę komunikacyjną \isqrc{}, 
+mechanizm opóźnień (\texttt{DelayNs}) oraz piny przetwornika ADC 
+wykorzystywane do pomiaru napięcia na kondensatorach układu zasilania. 
+Dzięki temu logika odpowiedzialna za obsługę pojedynczego węzła pomiarowego 
+została skoncentrowana w~jednym miejscu, co znacząco upraszcza jej dalsze 
+wykorzystanie w~warstwie wyższego poziomu, odpowiedzialnej za transmisję danych.
+
+Parametryzacja generyczna struktury (\texttt{VemlConfig}, \texttt{Bmp280Config}, 
+\texttt{D}, \texttt{SumCapPin}, \texttt{SecondCapPin}) pozwala na statyczne, 
+rozstrzygane na etapie kompilacji dostosowanie konfiguracji poszczególnych 
+czujników oraz przypisanych pinów, bez wprowadzania narzutu związanego 
+z~dynamicznym dyspozytorem \translation{dynamic dispatch}.
+
+Za centralizację odczytu odpowiadają metody \texttt{read\_modules} oraz 
+\texttt{read\_charge\_info}, które sekwencyjnie odpytują poszczególne czujniki, 
+a~uzyskane wartości koduje przy użyciu typu \texttt{TypedLabelReadout}, 
+zapisując je bezpośrednio do wspólnego bufora bajtowego. 
+Metoda \texttt{read\_bytes}, stanowiąca publiczny punkt wejścia dla warstw 
+nadrzędnych, łączy identyfikator węzła pomiarowego, dane z~modułów klimatycznych 
+oraz informacje o~stanie naładowania kondensatorów w~jedną, spójną ramkę danych 
+o~ustalonym rozmiarze, gotową do dalszej transmisji.
+
+Obsługa błędów została zorganizowana w~sposób hierarchiczny, poprzez zestaw 
+dedykowanych typów wyliczeniowych (\texttt{ModuleInitError}, 
+\texttt{ClimateSensorInitError}, \texttt{ModuleReadError}, 
+\texttt{ClimateSensorReadError}) wraz z~implementacjami cechy \texttt{From}, 
+umożliwiającymi automatyczną propagację błędów niższego poziomu za 
+pomocą operatora \texttt{?}.

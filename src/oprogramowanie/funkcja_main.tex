@@ -1,0 +1,33 @@
+\section{Funkcja główna}
+Funkcja \texttt{main} stanowi punkt centralny aplikacji, spinający 
+w~jedną całość wszystkie opisane wcześniej moduły w~ramach 
+głównej pętli programu, zorientowanej na ograniczenie 
+zużycia energii. Po jednorazowej inicjalizacji peryferiów 
+(ADC, magistrali I2C, nadajnika radiowego OOK oraz obiektu 
+\texttt{PowerManager}), a~także uzbrojeniu liczników 
+sprzętowych (WDT oraz timera nadajnika radiowego), urządzenie 
+przechodzi we właściwy cykl pracy, w~którym większość czasu 
+spędza w~stanie uśpienia — wybudzane cyklicznie jedynie przez 
+przerwanie WDT, aż \texttt{sleep::ready()} zasygnalizuje upływ 
+zadanego okresu (~1 minuty).
+
+Po każdym wybudzeniu następuje krótkotrwała aktywacja modułów 
+o~podwyższonym poborze prądu (za pośrednictwem metody 
+\texttt{power\_manager.activate\_power\_hungry()}) oraz, przy
+braku wcześniejszej inicjalizacji, jednorazowa inicjalizacja 
+czujnika klimatycznego. Odczytane dane pomiarowe są następnie 
+wielokrotnie (\texttt{SEND\_DATA\_N\_TIMES}) nadawane przez transmiter radiowy, 
+przy czym błędy zarówno inicjalizacji, jak i~odczytu czujnika są 
+świadomie ignorowane (\texttt{continue}/pusty blok \texttt{Err}) — co jest podejściem 
+uzasadnionym w~kontekście urządzenia bateryjnego, pracującego bez 
+nadzoru, gdzie priorytetem jest kontynuacja działania kosztem 
+utraty pojedynczego pomiaru. Po zakończeniu transmisji zasilanie 
+modułów energochłonnych jest ponownie wyłączane, a~stan diody 
+statusowej sygnalizuje aktywność urządzenia w~trakcie całego 
+cyklu pomiarowego.
+
+Osobno zdefiniowana została procedura obsługi paniki (panic\_handler), 
+która — z uwagi na brak możliwości bezpiecznego kontynuowania działania
+programu — sygnalizuje błąd za pomocą migającej diody LED, a~następnie 
+wymusza twardy restart mikrokontrolera poprzez skonfigurowanie WDT 
+w~trybie resetu sprzętowego z~minimalnym możliwym czasem oczekiwania.

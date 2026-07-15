@@ -1,0 +1,34 @@
+\section{Usypianie mikrokontrolera}
+Moduł \texttt{sleep} odpowiada za zarządzanie energooszczędnym 
+trybem pracy mikrokontrolera, wykorzystując do tego celu 
+Watchdog Timer (WDT) skonfigurowany w~trybie przerwania, a~nie resetu. 
+Funkcja \texttt{setup\_wdt} inicjalizuje licznik z~interwałem wynoszącym ok. 
+8~sekund oraz włącza bit \texttt{WDIE}, dzięki czemu każde przepełnienie 
+licznika generuje przerwanie, a~nie sprzętowy restart układu. 
+Ponieważ pojedynczy cykl WDT jest zbyt krótki dla docelowego okresu 
+uśpienia, licznik \texttt{WDT\_COUNT} — chroniony przez \texttt{interrupt::Mutex} ze 
+względu na dostęp z~kontekstu przerwania — zlicza kolejne wybudzenia, 
+aż osiągnie wartość \texttt{WAKE\_CYCLES}, co odpowiada łącznemu czasowi uśpienia 
+równemu ok. minucie. Funkcja \texttt{ready} udostępnia ten stan warstwie 
+wyższego poziomu, zwracając true i~zerując licznik dopiero po 
+osiągnięciu zadanej liczby cykli.
+
+Właściwe przejście w~stan uśpienia realizowane jest przez funkcję 
+\texttt{enter\_sleep}, która przed uśpieniem wyłącza zbędne peryferia (timery, 
+USART, SPI, TWI) za pomocą rejestru Power Reduction Register, 
+pozostawiając aktywny jedynie przetwornik ADC. Mikrokontroler ustawiany 
+jest w~tryb power-down (najgłębszy dostępny tryb oszczędzania energii), 
+a~dodatkowo wyłączany jest detektor spadku napięcia zasilania (BOD), co 
+pozwala ograniczyć pobór prądu w~czasie snu. Operacja ta wymaga zachowania 
+ściśle określonej sekwencji zapisów do rejestru \texttt{MCUCR} w~krótkim oknie 
+czasowym, dlatego jest wykonywana z~wyłączonymi przerwaniami globalnymi 
+(\texttt{interrupt::free}).
+
+Bezpośrednio po wywołaniu instrukcji uśpienia (\texttt{avr\_device::asm::sleep()}) 
+procesor zatrzymuje wykonywanie do momentu wystąpienia przerwania — w~tym 
+przypadku pochodzącego od WDT. Obsługa przerwania WDT inkrementuje licznik 
+\texttt{WDT\_COUNT} oraz ponownie ustawia bit \texttt{WDIE}, który jest automatycznie 
+czyszczony przez sprzęt po każdym wyzwoleniu, co jest niezbędne do 
+zachowania trybu przerwania (a~nie resetu) przy kolejnych cyklach. 
+Po powrocie ze stanu uśpienia funkcja \texttt{enter\_sleep} czyści bit 
+\texttt{SE} (Sleep Enable) oraz przywraca zasilanie wszystkich peryferiów, kończąc cykl.
