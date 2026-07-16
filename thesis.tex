@@ -107,14 +107,7 @@ Tu treść wstępu (który piszemy na końcu, po napisaniu całej pracy).
 
 \include{src/oprogramowanie}
 
-
-
-\pagebreak
-\chapter{Testy}
-\section{Zasięg komunikacji radiowej}
-\section{Pobór prądu}
-\section{Czas pracy}
-\section{Porównanie z rozwiązaniami komercjalnymi}
+\include{src/pomiary}
 
 \chapter*{Podsumowanie} % jak we wstępie
 \addcontentsline{toc}{chapter}{Podsumowanie}
@@ -124,21 +117,25 @@ Tu treść podsumowania (którą --- oczywiście --- też piszemy na końcu).
 
  % jeśli są listingi:
 \cleardoublepage
+\phantomsection
 \addcontentsline{toc}{chapter}{Spis listingów}
 \renewcommand{\lstlistlistingname}{Spis listingów}
 \lstlistoflistings{}
 
  % jeśli są tabele:
 \cleardoublepage
+\phantomsection
 \addcontentsline{toc}{chapter}{Spis tabel}
 \listoftables{}
 
  % jeśli są rysunki:
 \cleardoublepage
+\phantomsection
 \addcontentsline{toc}{chapter}{Spis rysunków}
 \listoffigures{}
 
 \cleardoublepage
+\phantomsection
 \addcontentsline{toc}{chapter}{Bibliografia} % też ręczne dodanie do spisu treści, jak Wstęp
 \label{sec:bibliografia}
 \bibliography{ref.bib}
