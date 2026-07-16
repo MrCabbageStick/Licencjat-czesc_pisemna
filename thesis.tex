@@ -73,7 +73,7 @@
 % interlinia
 \linespread{1.25}
 
-\bibliographystyle{plain}
+\bibliographystyle{plainurl}
 
 \begin{document}
 
@@ -99,7 +99,37 @@
 \addcontentsline{toc}{chapter}{Wstęp} % ...ale w spisie treści ma być...
 \chaptermark{Wstęp} % ...i w paginie górnej
 
-Tu treść wstępu (który piszemy na końcu, po napisaniu całej pracy).
+Rozwój technologii cyfrowych oraz rosnąca automatyzacja procesów
+przemysłowych i~domowych sprawiają, że dokładny i~ciągły pomiar
+parametrów środowiskowych staje się coraz istotniejszym elementem
+współczesnej inżynierii. Dostępne na rynku konsumenckim stacje pogodowe,
+mimo rosnącej funkcjonalności, charakteryzują się ograniczoną dokładnością
+pomiarową oraz koniecznością zasilania z~sieci elektrycznej lub okresowej
+wymiany baterii jednorazowych, co w~przypadku montażu zewnętrznego,
+w~miejscach trudno dostępnych lub oddalonych, jest niepraktyczne bądź
+generuje dodatkowe koszty eksploatacyjne.
+ 
+Celem niniejszej pracy jest zaprojektowanie i~wykonanie autorskiego
+czujnika klimatycznego pozbawionego akumulatora, zasilanego wyłącznie
+energią pochodzącą z~paneli fotowoltaicznych, magazynowaną
+w~superkondensatorach. Zbudowane urządzenie dokonuje pomiaru temperatury,
+wilgotności względnej, ciśnienia atmosferycznego, natężenia oświetlenia
+oraz poziomu promieniowania jonizującego, a~zgromadzone dane przesyła
+bezprzewodowo do stacji bazowej za pomocą autorskiego protokołu radiowego.
+Realizacja projektu obejmowała zarówno zaprojektowanie i~wykonanie układu
+elektronicznego, jak i~opracowanie oprogramowania sterującego
+mikrokontrolerem ATmega328p, zaimplementowanego w~języku Rust, którego
+mechanizmy bezpieczeństwa pamięci, weryfikowane statycznie na etapie
+kompilacji, stanowią alternatywę dla tradycyjnie stosowanego w~systemach
+wbudowanych języka C.
+ 
+Praca składa się z~sześciu rozdziałów. Rozdziały pierwszy i~drugi mają
+charakter wprowadzający --- omówiono w~nich dostępne na rynku moduły
+pomiarowe, technologie magazynowania energii oraz porównanie języków
+programowania stosowanych w~systemach wbudowanych. Rozdział trzeci
+przedstawia założenia projektowe zrealizowanego urządzenia, rozdziały
+czwarty i~piąty opisują odpowiednio jego warstwę sprzętową i~programową,
+a~rozdział szósty przedstawia wyniki przeprowadzonych pomiarów.
 
 \include{src/wprowadzenie}
 
@@ -113,7 +143,37 @@ Tu treść wstępu (który piszemy na końcu, po napisaniu całej pracy).
 \addcontentsline{toc}{chapter}{Podsumowanie}
 \chaptermark{Podsumowanie}
 
-Tu treść podsumowania (którą --- oczywiście --- też piszemy na końcu).
+Rozwój technologii cyfrowych oraz rosnąca automatyzacja procesów
+przemysłowych i~domowych sprawiają, że dokładny i~ciągły pomiar
+parametrów środowiskowych staje się coraz istotniejszym elementem
+współczesnej inżynierii. Dostępne na rynku konsumenckim stacje pogodowe,
+mimo rosnącej funkcjonalności, charakteryzują się ograniczoną dokładnością
+pomiarową oraz koniecznością zasilania z~sieci elektrycznej lub okresowej
+wymiany baterii jednorazowych, co w~przypadku montażu zewnętrznego,
+w~miejscach trudno dostępnych lub oddalonych, jest niepraktyczne bądź
+generuje dodatkowe koszty eksploatacyjne.
+ 
+Celem niniejszej pracy jest zaprojektowanie i~wykonanie autorskiego
+czujnika klimatycznego pozbawionego akumulatora, zasilanego wyłącznie
+energią pochodzącą z~paneli fotowoltaicznych, magazynowaną
+w~superkondensatorach. Zbudowane urządzenie dokonuje pomiaru temperatury,
+wilgotności względnej, ciśnienia atmosferycznego, natężenia oświetlenia
+oraz poziomu promieniowania jonizującego, a~zgromadzone dane przesyła
+bezprzewodowo do stacji bazowej za pomocą autorskiego protokołu radiowego.
+Realizacja projektu obejmowała zarówno zaprojektowanie i~wykonanie układu
+elektronicznego, jak i~opracowanie oprogramowania sterującego
+mikrokontrolerem ATmega328p, zaimplementowanego w~języku Rust, którego
+mechanizmy bezpieczeństwa pamięci, weryfikowane statycznie na etapie
+kompilacji, stanowią alternatywę dla tradycyjnie stosowanego w~systemach
+wbudowanych języka C.
+ 
+Praca składa się z~sześciu rozdziałów. Rozdziały pierwszy i~drugi mają
+charakter wprowadzający --- omówiono w~nich dostępne na rynku moduły
+pomiarowe, technologie magazynowania energii oraz porównanie języków
+programowania stosowanych w~systemach wbudowanych. Rozdział trzeci
+przedstawia założenia projektowe zrealizowanego urządzenia, rozdziały
+czwarty i~piąty opisują odpowiednio jego warstwę sprzętową i~programową,
+a~rozdział szósty przedstawia wyniki przeprowadzonych pomiarów.
 
  % jeśli są listingi:
 \cleardoublepage

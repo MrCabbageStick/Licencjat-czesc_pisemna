@@ -51,14 +51,14 @@ ma rozmiar 5 bajtów i~strukturę:
 Za serializację danych pomiarowych odpowiedzialna 
 jest struktura \texttt{TypedLabelReadout}, przedstawiona na 
 listingu~\ref{lst:typed_lebel_readout}.
-Posiada ona ona czterobajtowe pole danych typu \texttt{u32} 
+Posiada ona czterobajtowe pole danych typu \texttt{u32} 
 oraz trzy parametry generyczne \texttt{ID}, \texttt{SCALE}
 i~\texttt{TYPE}, odpowiedzialne odpowiednio za: numer urządzenia
 pomiarowego, rozdzielczość danych i~typ urządzenia pomiarowego.
 
 \begin{lstlisting}[
     language=Rust, style=colouredRust, 
-    caption={Struktura \texttt{Transmitter}},
+    caption={Struktura \texttt{TypedLabelReadout}},
     label={lst:typed_lebel_readout}
 ]
 pub struct TypedLabelReadout<ID, SCALE, TYPE>{
@@ -76,7 +76,7 @@ każdej z~informacji, utworzona jest stała \texttt{LABEL}.
 
 \begin{lstlisting}[
     language=Rust, style=colouredRust, 
-    caption={Implemetacja strktury \texttt{TypedLabelReadout}},
+    caption={Implementacja struktury \texttt{TypedLabelReadout}},
     label={lst:typed_label_readout_impl}
 ]
 impl<ID: SensorId, SCALE: UnitScale, TYPE: SensorType> TypedLabelReadout<ID, SCALE, TYPE> {
@@ -112,7 +112,7 @@ na zakodowanie informacji o~pomiarze.
 
 \begin{lstlisting}[
     language=Rust, style=colouredRust, 
-    caption={Struktura \texttt{Transmitter}},
+    caption={Struktura \texttt{LabeledReadout}},
     label={lst:labeled_readout_trait}
 ]
 pub trait LabeledReadout<const N_BYTES: usize>{
