@@ -143,38 +143,37 @@ a~rozdział szósty przedstawia wyniki przeprowadzonych pomiarów.
 \addcontentsline{toc}{chapter}{Podsumowanie}
 \chaptermark{Podsumowanie}
 
-Rozwój technologii cyfrowych oraz rosnąca automatyzacja procesów
-przemysłowych i~domowych sprawiają, że dokładny i~ciągły pomiar
-parametrów środowiskowych staje się coraz istotniejszym elementem
-współczesnej inżynierii. Dostępne na rynku konsumenckim stacje pogodowe,
-mimo rosnącej funkcjonalności, charakteryzują się ograniczoną dokładnością
-pomiarową oraz koniecznością zasilania z~sieci elektrycznej lub okresowej
-wymiany baterii jednorazowych, co w~przypadku montażu zewnętrznego,
-w~miejscach trudno dostępnych lub oddalonych, jest niepraktyczne bądź
-generuje dodatkowe koszty eksploatacyjne.
+W ramach niniejszej pracy zaprojektowano i~wykonano funkcjonalny prototyp
+bezakumulatorowego czujnika klimatycznego, zasilanego wyłącznie energią
+pochodzącą z~paneli fotowoltaicznych i~magazynowaną w~superkondensatorach.
+Zrealizowane urządzenie dokonuje pomiaru temperatury, wilgotności
+względnej, ciśnienia atmosferycznego, natężenia oświetlenia oraz poziomu
+promieniowania jonizującego, a~zebrane dane przesyła bezprzewodowo, za
+pomocą autorskiej biblioteki \texttt{ook\_433mhz}, do stacji bazowej.
+Przeprowadzone testy, trwające odpowiednio 10 i~31 godzin w~warunkach
+wewnętrznych oraz zewnętrznych, potwierdziły poprawność działania
+zbudowanego układu, a~ładunek zgromadzony w~superkondensatorach pozwolił
+na podtrzymanie pracy urządzenia bez dostępu do źródła zasilania przez
+okres około 12 godzin.
  
-Celem niniejszej pracy jest zaprojektowanie i~wykonanie autorskiego
-czujnika klimatycznego pozbawionego akumulatora, zasilanego wyłącznie
-energią pochodzącą z~paneli fotowoltaicznych, magazynowaną
-w~superkondensatorach. Zbudowane urządzenie dokonuje pomiaru temperatury,
-wilgotności względnej, ciśnienia atmosferycznego, natężenia oświetlenia
-oraz poziomu promieniowania jonizującego, a~zgromadzone dane przesyła
-bezprzewodowo do stacji bazowej za pomocą autorskiego protokołu radiowego.
-Realizacja projektu obejmowała zarówno zaprojektowanie i~wykonanie układu
-elektronicznego, jak i~opracowanie oprogramowania sterującego
-mikrokontrolerem ATmega328p, zaimplementowanego w~języku Rust, którego
-mechanizmy bezpieczeństwa pamięci, weryfikowane statycznie na etapie
-kompilacji, stanowią alternatywę dla tradycyjnie stosowanego w~systemach
-wbudowanych języka C.
+Wybór języka Rust do implementacji oprogramowania sterującego
+mikrokontrolerem okazał się uzasadniony --- statyczna weryfikacja
+poprawności typów na etapie kompilacji pozwoliła na wyeliminowanie części
+błędów już na etapie tworzenia kodu, bez narzutu czasu wykonania. Należy
+jednak zaznaczyć, że część mechanizmów języka, takich jak arytmetyka
+liczb 64-bitowych, nie jest natywnie wspierana przez architekturę AVR
+i~wymaga emulacji programowej, co negatywnie wpływa na wydajność kodu.
  
-Praca składa się z~sześciu rozdziałów. Rozdziały pierwszy i~drugi mają
-charakter wprowadzający --- omówiono w~nich dostępne na rynku moduły
-pomiarowe, technologie magazynowania energii oraz porównanie języków
-programowania stosowanych w~systemach wbudowanych. Rozdział trzeci
-przedstawia założenia projektowe zrealizowanego urządzenia, rozdziały
-czwarty i~piąty opisują odpowiednio jego warstwę sprzętową i~programową,
-a~rozdział szósty przedstawia wyniki przeprowadzonych pomiarów.
-
+Zrealizowany projekt można rozwijać w~kilku kierunkach, między innymi
+poprzez wykorzystanie przewidzianej na płytce magistrali 1-Wire do
+podłączenia dodatkowych czujników, wprowadzenie mechanizmu potwierdzeń
+w~jednokierunkowym obecnie protokole radiowym oraz przeprowadzenie
+długoterminowych testów sezonowych. Podsumowując, cel pracy ---
+zaprojektowanie i~wykonanie autonomicznego, bezobsługowego czujnika
+klimatycznego niewymagającego akumulatora --- został osiągnięty, a~samo
+urządzenie potwierdza, że superkondensatory w~połączeniu z~zasilaniem
+fotowoltaicznym stanowią realną alternatywę dla bateryjnych stacji
+pogodowych
  % jeśli są listingi:
 \cleardoublepage
 \phantomsection
