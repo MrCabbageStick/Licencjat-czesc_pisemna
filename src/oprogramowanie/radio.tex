@@ -3,9 +3,11 @@ Obsługa modułu radiowego realizowana jest poprzez autorską
 bibliotekę \texttt{ook\_433mhz} realizującą przesył i~odczyt
 danych z~prostych nadajników radiowych używając metody
 \textit{On--Off Keying} (OOK).
-Biblioteka jest mocno inspirowana biblioteką
-\texttt{RadioHead}, ze szczególnym naciskiem na zawartą w~niej 
-klasę \texttt{RH\_ASK}.
+Biblioteka jest mocno inspirowana napisaną w~języku \textit{C++} 
+biblioteką \texttt{RadioHead} --- oferującą algorytmy przesyłu i~odbioru danych 
+z~modułów radiowych --- ze szczególnym naciskiem na zawartą w~niej 
+klasę \texttt{RH\_ASK} --- odpowiedzialną za komunikację z~użyciem metody 
+\textit{Amplitude Shift Keying}.
 
 Ten podrozdział jest poświęcony obsłudze nadajnika radiowego
 (struktura \texttt{Transmitter} biblioteki \texttt{ook\_433mhz})
@@ -28,28 +30,6 @@ Same bity podzielone są na próbki (nazywane w~programie angielskim słowem
 \textit{tick}) używane do sterowania linią danych nadajnika radiowego.
 Każda próbka przyjmuje wartość 0~lub~1, identyczną z~wartością bitu, który 
 buduje.
-
-\subsection{Maszyna stanów}
-Struktura \texttt{Transmitter} posiada pole \texttt{state} określające obecny 
-stan nadajnika, wybrany spośród pięciu wartości opisanych w~typie wyliczeniowym
-\texttt{TxState}:
-\begin{enumerate}
-    \item \textbf{\texttt{Idle}} --- stan ustawiany jako domyślny i~osiągany
-    w~momencie zakończenia transmisji.
-
-    \item \textbf{\texttt{Syncing}} --- stan, podczas którego wysyłane są bajty 
-    sygnału synchronizującego, przypisywany nadajnikowi w~momencie, gdy dane 
-    w~buforze są gotowe do wysłania.
-    
-    \item \textbf{\texttt{SendingStartByte}} --- stan osiągany po wysłaniu wszystkich
-    wymaganych bajtów synchronizacyjnych, w~którym nadajnik wysyła bajt startu.
-    
-    \item \textbf{\texttt{SendingData}} --- stan, w~którym nadajnik wysyła
-    zawartość bufora, osiągany po wysłaniu bajtu startu.
-    
-    \item \textbf{\texttt{DataSent}} --- stan osiągany po wysłaniu całej zawartości
-    bufora.
-\end{enumerate}
 
 \subsection{Struktura \texttt{Transmitter}}
 Struktura \texttt{Transmitter}, pokazana na listingu~\ref{lst:transmitter_struct},
@@ -85,6 +65,27 @@ pub struct Transmitter<const TICKS_PER_BIT: u8, Pin: OutputPin> {
 }
 \end{lstlisting}
 
+\subsection{Maszyna stanów}
+Struktura \texttt{Transmitter} posiada pole \texttt{state} określające obecny 
+stan nadajnika, wybrany spośród pięciu wartości opisanych w~typie wyliczeniowym
+\texttt{TxState}:
+\begin{enumerate}
+    \item \textbf{\texttt{Idle}} --- stan ustawiany jako domyślny i~osiągany
+    w~momencie zakończenia transmisji.
+
+    \item \textbf{\texttt{Syncing}} --- stan, podczas którego wysyłane są bajty 
+    sygnału synchronizującego, przypisywany nadajnikowi w~momencie, gdy dane 
+    w~buforze są gotowe do wysłania.
+    
+    \item \textbf{\texttt{SendingStartByte}} --- stan osiągany po wysłaniu wszystkich
+    wymaganych bajtów synchronizacyjnych, w~którym nadajnik wysyła bajt startu.
+    
+    \item \textbf{\texttt{SendingData}} --- stan, w~którym nadajnik wysyła
+    zawartość bufora, osiągany po wysłaniu bajtu startu.
+    
+    \item \textbf{\texttt{DataSent}} --- stan osiągany po wysłaniu całej zawartości
+    bufora.
+\end{enumerate}
 
 \subsection{Przygotowanie danych, kodowanie 4b6b}
 Kodowanie 4B6B \translation{4--bit/6--bit} to schemat kodowania liniowego, 
@@ -155,6 +156,6 @@ wszystkich próbek dla jednego bitu.
 Funkcje pośrednie zwracają jeden z~trzech stanów, informując metodę 
 \texttt{transmit} o~etapie wykonania swoich czynności lub o~wystąpieniu błędu.
 
-Wywołanie metody transmit powinno zachodzić w~równych interwałach. W~środowisku
+Wywołanie metody \texttt{transmit} powinno zachodzić w~równych interwałach. W~środowisku
 systemów wbudowanych dobrym sposobem osiągnięcia tego jest zastosowanie 
 przerwań pochodzących z~liczników mikrokontrolera.
