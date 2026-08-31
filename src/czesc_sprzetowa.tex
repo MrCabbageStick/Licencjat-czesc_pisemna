@@ -161,7 +161,6 @@ został przedstawiony w~tabeli~\ref{tab:microcontroller_port_functions}.
     \label{rys:atmega328p_in_schematic}
 \end{figure}
 
-
 \section{Magistrala \isqrc}
 \label{section:i2c_hardware}
 Obsługa magistrali realizowana jest przez dwa wyprowadzenia mikrokontrolera:
@@ -174,6 +173,16 @@ konwertery stanów logicznych \translation{level shifter}, widoczne na
 rysunku~\ref{rys:i2c_level_shifters}. Jednocześnie rezystory konwertera 
 służą za rezystory podciągające wymagane przez standard 
 \isqrc{}~\cite{I2C_specification}.
+
+
+\section{Układ komunikacji radiowej}
+Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych 
+modułu nadajnika radiowego podłączoną do pinu PD7 mikrokontrolera. 
+Przygotowanie i~buforowanie danych spoczywa na jednostce centralnej. 
+Z~racji dużego i~ciągłego poboru mocy przez układ radiowy linia zasilania, 
+podobnie jak w przypadku magistrali \isqrc, została wyposażona 
+w~odcinający przepływ prądu tranzystor (rysunek~\ref{rys:rf_voltage_enable}), 
+a~linia danych w~konwerter stanów logicznych (rysunek~\ref{rys:rf_level_shifters}).
 
 \begin{figure}[H]
     \centering
@@ -190,16 +199,6 @@ służą za rezystory podciągające wymagane przez standard
         \label{rys:i2c_level_shifters}
     \end{minipage}
 \end{figure}
-
-
-\section{Układ komunikacji radiowej}
-Komunikacja radiowa odbywa się poprzez bezpośrednie sterowanie linią danych 
-modułu nadajnika radiowego podłączoną do pinu PD7 mikrokontrolera. 
-Przygotowanie i~buforowanie danych spoczywa na jednostce centralnej. 
-Z~racji dużego i~ciągłego poboru mocy przez układ radiowy linia zasilania, 
-podobnie jak w przypadku magistrali \isqrc, została wyposażona 
-w~odcinający przepływ prądu tranzystor (rysunek~\ref{rys:rf_voltage_enable}), 
-a~linia danych w~konwerter stanów logicznych (rysunek~\ref{rys:rf_level_shifters}).
 
 \begin{figure}[H]
     \centering
